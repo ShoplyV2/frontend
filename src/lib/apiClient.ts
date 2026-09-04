@@ -1,4 +1,4 @@
-import type { Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus } from './types';
+import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus } from './types';
 
 export const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
@@ -99,6 +99,17 @@ export async function signupSeller(
     throw new ApiError(body?.error ?? 'UNKNOWN', body?.message ?? `Request failed (${response.status})`, response.status);
   }
 
+  return response.json();
+}
+
+// --- Admin (dev-only, no auth — see backend/src/routes/admin.route.ts) -------
+
+export async function listAdminSellers(): Promise<{ sellers: AdminSellerSummary[] }> {
+  const response = await fetch(`${DEFAULT_BASE_URL}/admin/sellers`);
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+    throw new ApiError(body?.error ?? 'UNKNOWN', body?.message ?? `Request failed (${response.status})`, response.status);
+  }
   return response.json();
 }
 

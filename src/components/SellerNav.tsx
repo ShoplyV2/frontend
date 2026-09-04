@@ -4,11 +4,11 @@ import Link from 'next/link';
 
 const TABS = [
   { href: '/catalog', label: 'Catalog' },
-  { href: '/', label: 'Orders & handoffs' },
+  { href: '/feed', label: 'Orders & handoffs' },
   { href: '/onboarding', label: 'Shop setup' },
 ] as const;
 
-export function SellerNav({ active, onSignOut }: { active: '/catalog' | '/' | '/onboarding'; onSignOut: () => void }) {
+export function SellerNav({ active, onSignOut }: { active: '/catalog' | '/feed' | '/onboarding'; onSignOut: () => void }) {
   return (
     <div className="row" style={{ justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
       <div className="row" style={{ gap: '0.4rem' }}>
@@ -18,9 +18,14 @@ export function SellerNav({ active, onSignOut }: { active: '/catalog' | '/' | '/
           </Link>
         ))}
       </div>
-      <button className="secondary" onClick={onSignOut}>
-        Sign out
-      </button>
+      <div className="row" style={{ gap: '0.4rem' }}>
+        <Link href="/">
+          <button className="secondary">All sellers</button>
+        </Link>
+        <button className="secondary" onClick={onSignOut}>
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }

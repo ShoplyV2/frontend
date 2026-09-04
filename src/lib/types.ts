@@ -110,6 +110,15 @@ export interface Bank {
   code: string;
 }
 
+// Dev-only, unauthenticated seller picker (no multi-tenant auth yet) — see backend/src/routes/admin.route.ts.
+export interface AdminSellerSummary {
+  id: string;
+  shopName: string;
+  status: SellerStatus;
+  active: boolean;
+  feedToken: string;
+}
+
 export interface CatalogImage {
   r2Key: string;
   url: string;
