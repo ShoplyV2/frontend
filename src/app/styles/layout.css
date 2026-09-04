@@ -1,0 +1,316 @@
+/*
+ * Breakpoints (mobile-first, min-width only; CSS custom properties can't be
+ * used inside media queries so these are hardcoded here):
+ *   900px  — nav switches from bottom tab bar to a persistent left sidebar,
+ *            forms go 2-column
+ *   1200px — catalog grid gains a column
+ *   1440px — content ceiling / catalog grid gains another column
+ */
+
+/* ---------- app shell ---------- */
+.app-shell {
+  min-block-size: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 900px) {
+  .app-shell {
+    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  }
+}
+
+/* ---------- page column ---------- */
+.page {
+  inline-size: 100%;
+  max-inline-size: var(--page-max);
+  margin-inline: auto;
+  padding-inline: max(var(--space-4), env(safe-area-inset-left));
+  padding-block-start: var(--space-5);
+  padding-block-end: calc(var(--tabbar-total) + var(--space-8));
+}
+@media (min-width: 900px) {
+  .page {
+    --tabbar-total: 0px;
+    padding-inline: var(--space-8);
+    padding-block: var(--space-8);
+  }
+}
+.page--narrow {
+  --page-max: var(--page-max-narrow);
+}
+.page--wide {
+  --page-max: var(--page-max-wide);
+}
+.page--centered {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-block-size: 100dvh;
+}
+
+/* ---------- stack ---------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap, var(--space-4));
+  min-inline-size: 0;
+}
+.stack--xs {
+  --stack-gap: var(--space-1);
+}
+.stack--sm {
+  --stack-gap: var(--space-2);
+}
+.stack--md {
+  --stack-gap: var(--space-3);
+}
+.stack--lg {
+  --stack-gap: var(--space-6);
+}
+
+/* ---------- cluster ---------- */
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cluster-gap, var(--space-2));
+  min-inline-size: 0;
+}
+.cluster--sm {
+  --cluster-gap: var(--space-1);
+}
+.cluster--lg {
+  --cluster-gap: var(--space-4);
+}
+.cluster--end {
+  justify-content: flex-end;
+}
+
+/* ---------- split ---------- */
+.split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-inline-size: 0;
+}
+.split > * {
+  min-inline-size: 0;
+}
+.split--top {
+  align-items: flex-start;
+}
+
+/* ---------- grids ---------- */
+.grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--grid-min, 18rem)), 1fr));
+}
+.grid--catalog {
+  --grid-min: 9.5rem;
+  gap: var(--space-3);
+}
+@media (min-width: 900px) {
+  .grid--catalog {
+    --grid-min: 13rem;
+    gap: var(--space-4);
+  }
+}
+
+.form-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 900px) {
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .form-grid > .field--full,
+  .form-grid > .form-actions {
+    grid-column: 1 / -1;
+  }
+}
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-block-start: var(--space-2);
+}
+
+/* ---------- field ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+.field--grow {
+  flex: 1 1 12rem;
+}
+.field-label {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+}
+.field-hint {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.field-error {
+  font-size: var(--text-sm);
+  color: var(--color-danger);
+  font-weight: var(--weight-medium);
+}
+
+/* ---------- section ---------- */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.section-title {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* ---------- nav: one <nav>, three treatments via media queries ---------- */
+.appnav {
+  position: fixed;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: var(--z-nav);
+  display: flex;
+  background: var(--color-surface);
+  border-block-start: 1px solid var(--color-border);
+  padding-block-end: env(safe-area-inset-bottom, 0px);
+}
+.appnav-item {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-block-size: var(--tabbar-h);
+  padding-block: var(--space-1);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-2xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+.appnav-item:hover {
+  text-decoration: none;
+  color: var(--color-text-secondary);
+}
+.appnav-item:active {
+  background: var(--color-surface-hover);
+}
+.appnav-item[aria-current='page'] {
+  color: var(--color-accent);
+}
+.appnav-icon {
+  inline-size: 22px;
+  block-size: 22px;
+}
+.appnav-account {
+  display: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+.appnav-badge {
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-start: calc(50% + 6px);
+  min-inline-size: 16px;
+  block-size: 16px;
+  padding-inline: 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-danger-fill);
+  color: var(--color-on-danger-fill);
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+
+@media (min-width: 900px) {
+  .appnav {
+    position: sticky;
+    inset-block-start: 0;
+    grid-column: 1;
+    block-size: 100dvh;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-3);
+    padding-block-end: var(--space-4);
+    border-block-start: none;
+    border-inline-end: 1px solid var(--color-border);
+  }
+  .appnav-item {
+    flex: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--space-3);
+    min-block-size: var(--tap-min);
+    padding-inline: var(--space-3);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+  }
+  .appnav-item[aria-current='page'] {
+    background: var(--color-accent-soft);
+    color: var(--color-on-accent-soft);
+  }
+  .appnav-spacer {
+    margin-block-start: auto;
+  }
+  .appnav-badge {
+    position: static;
+    margin-inline-start: auto;
+  }
+  .appnav-account {
+    display: flex;
+  }
+}
+
+/* ---------- topbar (mobile only) ---------- */
+.topbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-nav);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-block-size: 56px;
+  padding-inline: var(--space-4);
+  padding-block-start: env(safe-area-inset-top, 0px);
+  background: var(--color-surface);
+  border-block-end: 1px solid var(--color-border);
+}
+@media (min-width: 900px) {
+  .topbar {
+    display: none;
+  }
+}
+
+/* Overflow control: never `overflow-x: hidden` on html/body (breaks
+   position:sticky). Fix real causes instead. */
+.stack,
+.cluster,
+.split,
+.field {
+  min-inline-size: 0;
+}

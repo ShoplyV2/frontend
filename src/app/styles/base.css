@@ -1,0 +1,167 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Scoped reset — NOT `* { margin: 0; padding: 0 }`, which is why list
+   padding had to be re-added inline in three places across the app. */
+:where(body, h1, h2, h3, h4, p, figure, blockquote, dl, dd, fieldset) {
+  margin: 0;
+}
+:where(ul, ol) {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+}
+:where(ul, ol)[class] {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+html {
+  height: 100%;
+  /* NOT overflow-x: hidden — that makes body a scroll container, which
+     silently breaks position:sticky (the desktop sidebar depends on it).
+     Real overflow causes are fixed at the source instead — see layout.css. */
+}
+
+body {
+  min-height: 100%;
+  background: var(--color-canvas);
+  color: var(--color-text);
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-normal);
+  text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-inline-size: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:where(a) {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+:where(a):hover {
+  text-decoration: underline;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/* --- typography --- */
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text);
+}
+h1 {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+}
+h2 {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+}
+h3 {
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-semibold);
+}
+
+@media (min-width: 900px) {
+  h1 {
+    font-size: var(--text-3xl);
+    line-height: var(--leading-3xl);
+  }
+  h2 {
+    font-size: var(--text-xl);
+    line-height: var(--leading-xl);
+  }
+}
+
+small {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+strong,
+b {
+  font-weight: var(--weight-semibold);
+}
+code,
+kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- accessibility baseline --- */
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--color-focus-halo);
+  border-radius: var(--radius-sm);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Minimum tap target (44px = Apple HIG) on every interactive element. */
+:where(button, [role='button'], a.btn, select, summary, .tabbar-item, .file-tile) {
+  min-block-size: var(--tap-min);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: var(--color-border-strong);
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

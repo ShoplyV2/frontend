@@ -1,0 +1,254 @@
+/*
+ * Design tokens. Every semantic colour is split into four parts so ONE token
+ * set works in both themes without contrast disasters:
+ *   --color-{name}-fill     solid background
+ *   --color-on-{name}-fill  label ON that background
+ *   --color-{name}-soft     tint, for badges/alerts
+ *   --color-on-{name}-soft  label ON the tint
+ * (Previously --accent/--danger/--warning were single values never
+ * redefined for dark mode, so #0f766e on #0a0a0a measured 2.2:1 — unreadable.)
+ *
+ * Dark mode is duplicated :root blocks, NOT light-dark() — that function
+ * needs Safari 17.5+, and sellers keep iPhones for years without updating.
+ * Where light-dark() is unsupported the whole declaration is invalid and
+ * custom properties fall back to nothing, so the app would render unstyled.
+ * The two dark blocks below are marked KEEP IN SYNC — edit both together.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* surfaces — layered so cards read as objects, not a colour-run canvas */
+  --color-canvas: #f5f7f8;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #eef1f3;
+  --color-surface-hover: #f2f5f6;
+  --color-overlay: rgb(12 18 22 / 0.45);
+
+  /* text hierarchy */
+  --color-text: #101619;
+  --color-text-secondary: #495963;
+  --color-text-muted: #66757f;
+  --color-text-inverse: #ffffff;
+
+  /* borders */
+  --color-border-subtle: #e6eaed;
+  --color-border: #d5dbe0;
+  --color-border-strong: #adb8c0;
+
+  /* accent — Shoply teal */
+  --color-accent: #0f766e;
+  --color-accent-fill: #0f766e;
+  --color-accent-fill-hover: #115e59;
+  --color-accent-fill-active: #134e4a;
+  --color-on-accent-fill: #ffffff;
+  --color-accent-soft: #d6efec;
+  --color-on-accent-soft: #0a544d;
+  --color-accent-border: #8fd0c9;
+
+  /* semantic */
+  --color-success: #146c43;
+  --color-success-fill: #146c43;
+  --color-on-success-fill: #ffffff;
+  --color-success-soft: #d7f0e2;
+  --color-on-success-soft: #0c4b2e;
+  --color-success-border: #8fd5b1;
+
+  --color-warning: #b45309;
+  --color-warning-fill: #b45309;
+  --color-on-warning-fill: #ffffff;
+  --color-warning-soft: #fceccd;
+  --color-on-warning-soft: #7a3c05;
+  --color-warning-border: #e8bd77;
+
+  --color-danger: #b91c1c;
+  --color-danger-fill: #b91c1c;
+  --color-on-danger-fill: #ffffff;
+  --color-danger-soft: #fbe1e1;
+  --color-on-danger-soft: #8d1616;
+  --color-danger-border: #eda6a6;
+
+  --color-focus: #0d5f58;
+  --color-focus-halo: #ffffff;
+
+  --shadow-sm: 0 1px 2px rgb(12 18 22 / 0.06), 0 1px 3px rgb(12 18 22 / 0.08);
+  --shadow-md: 0 2px 4px rgb(12 18 22 / 0.06), 0 12px 24px -8px rgb(12 18 22 / 0.16);
+
+  /* spacing — 4px base */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* type — size / line-height pairs */
+  --text-2xs: 0.6875rem;
+  --leading-2xs: 1rem;
+  --text-xs: 0.75rem;
+  --leading-xs: 1.125rem;
+  --text-sm: 0.875rem;
+  --leading-sm: 1.3125rem;
+  --text-base: 1rem;
+  --leading-base: 1.5rem;
+  --text-lg: 1.125rem;
+  --leading-lg: 1.625rem;
+  --text-xl: 1.25rem;
+  --leading-xl: 1.75rem;
+  --text-2xl: 1.5rem;
+  --leading-2xl: 1.9375rem;
+  --text-3xl: 1.875rem;
+  --leading-3xl: 2.25rem;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --tracking-tight: -0.011em;
+  --tracking-wide: 0.02em;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  --duration-fast: 110ms;
+  --duration: 170ms;
+  --duration-slow: 280ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+
+  --z-nav: 200;
+  --z-overlay: 300;
+  --z-modal: 310;
+  --z-toast: 400;
+
+  --tap-min: 44px;
+  --tabbar-h: 56px;
+  --sidebar-w: 240px;
+  --page-max: 68rem;
+  --page-max-narrow: 30rem;
+  --page-max-wide: 82rem;
+  --tabbar-total: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+}
+
+/* KEEP IN SYNC (1/2) — prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --color-canvas: #0c0e10;
+    --color-surface: #16191c;
+    --color-surface-sunken: #101315;
+    --color-surface-hover: #1f2428;
+    --color-overlay: rgb(0 0 0 / 0.62);
+
+    --color-text: #eceef0;
+    --color-text-secondary: #b2bac1;
+    --color-text-muted: #8c959d;
+    --color-text-inverse: #0c0e10;
+
+    --color-border-subtle: #1f2427;
+    --color-border: #2b3136;
+    --color-border-strong: #414951;
+
+    --color-accent: #5eead4;
+    --color-accent-fill: #14b8a6;
+    --color-accent-fill-hover: #2dd4bf;
+    --color-accent-fill-active: #0d9488;
+    --color-on-accent-fill: #04211d;
+    --color-accent-soft: #10312e;
+    --color-on-accent-soft: #7ee7d8;
+    --color-accent-border: #1d4f49;
+
+    --color-success: #6ee7a8;
+    --color-success-fill: #15a34a;
+    --color-on-success-fill: #04220f;
+    --color-success-soft: #0f2d1c;
+    --color-on-success-soft: #6ee7a8;
+    --color-success-border: #1c4d32;
+
+    --color-warning: #fbbf24;
+    --color-warning-fill: #d97706;
+    --color-on-warning-fill: #1c1102;
+    --color-warning-soft: #35250a;
+    --color-on-warning-soft: #fcd34d;
+    --color-warning-border: #5c421a;
+
+    --color-danger: #fca5a5;
+    --color-danger-fill: #dc2626;
+    --color-on-danger-fill: #ffffff;
+    --color-danger-soft: #3a1618;
+    --color-on-danger-soft: #fca5a5;
+    --color-danger-border: #632626;
+
+    --color-focus: #5eead4;
+    --color-focus-halo: #0c0e10;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.04);
+    --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.05);
+  }
+}
+
+/* KEEP IN SYNC (2/2) — manual [data-theme] override, for a future toggle */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-canvas: #0c0e10;
+  --color-surface: #16191c;
+  --color-surface-sunken: #101315;
+  --color-surface-hover: #1f2428;
+  --color-overlay: rgb(0 0 0 / 0.62);
+
+  --color-text: #eceef0;
+  --color-text-secondary: #b2bac1;
+  --color-text-muted: #8c959d;
+  --color-text-inverse: #0c0e10;
+
+  --color-border-subtle: #1f2427;
+  --color-border: #2b3136;
+  --color-border-strong: #414951;
+
+  --color-accent: #5eead4;
+  --color-accent-fill: #14b8a6;
+  --color-accent-fill-hover: #2dd4bf;
+  --color-accent-fill-active: #0d9488;
+  --color-on-accent-fill: #04211d;
+  --color-accent-soft: #10312e;
+  --color-on-accent-soft: #7ee7d8;
+  --color-accent-border: #1d4f49;
+
+  --color-success: #6ee7a8;
+  --color-success-fill: #15a34a;
+  --color-on-success-fill: #04220f;
+  --color-success-soft: #0f2d1c;
+  --color-on-success-soft: #6ee7a8;
+  --color-success-border: #1c4d32;
+
+  --color-warning: #fbbf24;
+  --color-warning-fill: #d97706;
+  --color-on-warning-fill: #1c1102;
+  --color-warning-soft: #35250a;
+  --color-on-warning-soft: #fcd34d;
+  --color-warning-border: #5c421a;
+
+  --color-danger: #fca5a5;
+  --color-danger-fill: #dc2626;
+  --color-on-danger-fill: #ffffff;
+  --color-danger-soft: #3a1618;
+  --color-on-danger-soft: #fca5a5;
+  --color-danger-border: #632626;
+
+  --color-focus: #5eead4;
+  --color-focus-halo: #0c0e10;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.05);
+}
