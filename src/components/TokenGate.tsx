@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export function TokenGate({ onSubmit }: { onSubmit: (token: string) => void }) {
   const [value, setValue] = useState('');
@@ -25,6 +26,9 @@ export function TokenGate({ onSubmit }: { onSubmit: (token: string) => void }) {
         />
         <button type="submit">Connect</button>
       </form>
+      <p style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
+        New seller? <Link href="/onboarding/signup">Set up your shop</Link>
+      </p>
     </div>
   );
 }

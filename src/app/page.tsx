@@ -4,6 +4,7 @@ import { HandoffQueue } from '@/components/HandoffQueue';
 import { HeroOrder } from '@/components/HeroOrder';
 import { OrderList } from '@/components/OrderList';
 import { TokenGate } from '@/components/TokenGate';
+import { SellerNav } from '@/components/SellerNav';
 import { useFeedData } from '@/lib/useFeedData';
 import { useFeedToken } from '@/lib/useFeedToken';
 
@@ -21,12 +22,8 @@ export default function Home() {
 
   return (
     <main style={{ maxWidth: '40rem', margin: '0 auto', padding: '1rem' }}>
-      <div className="row" style={{ justifyContent: 'space-between', marginBottom: '1rem' }}>
-        <h1>Shoply Seller Feed</h1>
-        <button className="secondary" onClick={() => setToken(null)}>
-          Sign out
-        </button>
-      </div>
+      <SellerNav active="/" onSignOut={() => setToken(null)} />
+      <h1 style={{ marginBottom: '1rem' }}>Orders &amp; handoffs</h1>
 
       {error && (
         <div className="card pill-danger" style={{ marginBottom: '1rem' }}>
