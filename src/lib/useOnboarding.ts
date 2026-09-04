@@ -9,7 +9,8 @@ export function useOnboarding(token: string | null) {
   const [state, setState] = useState<OnboardingState | null>(null);
   const [channels, setChannels] = useState<ChannelSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // The raw error, not a pre-extracted message — sellerMessage() needs the ApiError's `code`.
+  const [error, setError] = useState<unknown>(null);
 
   const refresh = useCallback(async () => {
     if (!token) return;
@@ -21,7 +22,7 @@ export function useOnboarding(token: string | null) {
       setChannels(channelsRes.channels);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load onboarding status');
+      setError(err);
     } finally {
       setLoading(false);
     }

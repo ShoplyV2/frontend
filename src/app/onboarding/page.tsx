@@ -1,24 +1,35 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ApiError, activateSeller } from '@/lib/apiClient';
+import { activateSeller } from '@/lib/apiClient';
+import { sellerMessage } from '@/lib/errorMessage';
+import { buildChecklist } from '@/lib/checklist';
 import { useFeedToken } from '@/lib/useFeedToken';
 import { useOnboarding } from '@/lib/useOnboarding';
-import { OnboardingProfileCard } from '@/components/OnboardingProfileCard';
-import { OnboardingChannelCard } from '@/components/OnboardingChannelCard';
-import { OnboardingPayoutCard } from '@/components/OnboardingPayoutCard';
+import { ProfileSection } from '@/components/onboarding/ProfileSection';
+import { ChannelSection } from '@/components/onboarding/ChannelSection';
+import { PayoutSection } from '@/components/onboarding/PayoutSection';
+import { ActivationChecklist } from '@/components/onboarding/ActivationChecklist';
+import { LiveCelebration } from '@/components/onboarding/LiveCelebration';
 import { TokenGate } from '@/components/TokenGate';
-import { SellerNav } from '@/components/SellerNav';
+import { AppShell } from '@/components/shell/AppShell';
+import { PageSkeleton } from '@/components/ui/PageSkeleton';
+import { Alert } from '@/components/ui/Alert';
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const { token, setToken, hydrated } = useFeedToken();
   const { profile, state, channels, loading, error, refresh } = useOnboarding(token);
   const [activating, setActivating] = useState(false);
   const [activateError, setActivateError] = useState<string | null>(null);
+  const [justActivated, setJustActivated] = useState(false);
 
-  if (!hydrated) return null;
+  if (!hydrated) {
+    return (
+      <div className="page">
+        <PageSkeleton />
+      </div>
+    );
+  }
   if (!token) return <TokenGate onSubmit={setToken} />;
 
   async function handleActivate() {
@@ -27,58 +38,59 @@ export default function OnboardingPage() {
     setActivateError(null);
     try {
       await activateSeller(token);
-      router.push('/catalog');
+      setJustActivated(true);
     } catch (err) {
-      setActivateError(err instanceof ApiError ? err.message : 'Could not activate your shop yet.');
+      setActivateError(sellerMessage(err, 'Could not open your shop yet.'));
+      refresh();
     } finally {
       setActivating(false);
     }
   }
 
+  const checklist = profile && state ? buildChecklist(state, profile, channels) : null;
+  const incompleteRequired = checklist?.filter((s) => s.required && !s.done).length ?? 0;
+
+  if (justActivated) {
+    return (
+      <AppShell token={token} shopName={profile?.shopName}>
+        <LiveCelebration />
+      </AppShell>
+    );
+  }
+
   return (
-    <main style={{ maxWidth: '40rem', margin: '0 auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <SellerNav active="/onboarding" onSignOut={() => setToken(null)} />
-      <h1>Set up your shop</h1>
+    <AppShell token={token} shopName={profile?.shopName} setupBadgeCount={incompleteRequired}>
+      <div className="stack">
+        <h1>Set up your shop</h1>
 
-      {error && (
-        <div className="card pill-danger">
-          <p>{error}</p>
-          <button onClick={() => refresh()}>Retry</button>
-        </div>
-      )}
+        {error != null && (
+          <Alert variant="danger" action={<button className="btn btn--secondary btn--sm" onClick={() => refresh()}>Try again</button>}>
+            {sellerMessage(error, 'Could not load your shop setup.')}
+          </Alert>
+        )}
 
-      {loading && !profile ? (
-        <p>Loading…</p>
-      ) : (
-        profile &&
-        state && (
-          <>
-            <div className="card">
-              <div className="row" style={{ justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <h2>Status</h2>
-                <span className="pill">{state.status}</span>
-              </div>
-              {state.ready ? (
-                <p>Everything is set — you are ready to go live.</p>
-              ) : (
-                <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  {state.blockers.map((blocker) => (
-                    <li key={blocker}>{blocker}</li>
-                  ))}
-                </ul>
-              )}
-              {activateError && <p style={{ color: 'var(--danger)', marginTop: '0.5rem' }}>{activateError}</p>}
-              <button onClick={handleActivate} disabled={!state.ready || activating} style={{ marginTop: '0.75rem' }}>
-                {activating ? 'Activating…' : 'Activate shop'}
-              </button>
-            </div>
-
-            <OnboardingProfileCard token={token} profile={profile} onSaved={refresh} />
-            <OnboardingChannelCard token={token} channels={channels} onChanged={refresh} />
-            <OnboardingPayoutCard token={token} payoutConfigured={state.payoutConfigured} onChanged={refresh} />
-          </>
-        )
-      )}
-    </main>
+        {loading && !profile ? (
+          <PageSkeleton />
+        ) : (
+          profile &&
+          state &&
+          checklist && (
+            <>
+              <ActivationChecklist
+                status={state.status}
+                steps={checklist}
+                ready={state.ready}
+                activating={activating}
+                activateError={activateError}
+                onActivate={handleActivate}
+              />
+              <ProfileSection token={token} profile={profile} onSaved={refresh} />
+              <ChannelSection token={token} channels={channels} onChanged={refresh} />
+              <PayoutSection token={token} payoutConfigured={state.payoutConfigured} onChanged={refresh} />
+            </>
+          )
+        )}
+      </div>
+    </AppShell>
   );
 }

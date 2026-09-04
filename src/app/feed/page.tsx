@@ -1,47 +1,70 @@
 'use client';
 
-import { HandoffQueue } from '@/components/HandoffQueue';
-import { HeroOrder } from '@/components/HeroOrder';
-import { OrderList } from '@/components/OrderList';
 import { TokenGate } from '@/components/TokenGate';
-import { SellerNav } from '@/components/SellerNav';
+import { AppShell } from '@/components/shell/AppShell';
+import { PageSkeleton } from '@/components/ui/PageSkeleton';
+import { Alert } from '@/components/ui/Alert';
+import { FeedSection } from '@/components/feed/FeedSection';
+import { OrderCard } from '@/components/feed/OrderCard';
+import { HandoffCard } from '@/components/feed/HandoffCard';
+import { sellerMessage } from '@/lib/errorMessage';
+import { isUrgent, sortByPriority } from '@/lib/orderPriority';
 import { useFeedData } from '@/lib/useFeedData';
 import { useFeedToken } from '@/lib/useFeedToken';
 
 export default function FeedPage() {
   const { token, setToken, hydrated } = useFeedToken();
-  const { orders, handoffs, loading, error, refresh } = useFeedData(token);
+  const { orders, handoffs, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeedData(token);
 
-  if (!hydrated) return null;
+  if (!hydrated) {
+    return (
+      <div className="page">
+        <PageSkeleton />
+      </div>
+    );
+  }
 
   if (!token) {
     return <TokenGate onSubmit={setToken} />;
   }
 
-  const [hero, ...rest] = orders;
+  const sortedOrders = sortByPriority(orders);
 
   return (
-    <main style={{ maxWidth: '40rem', margin: '0 auto', padding: '1rem' }}>
-      <SellerNav active="/feed" onSignOut={() => setToken(null)} />
-      <h1 style={{ marginBottom: '1rem' }}>Orders &amp; handoffs</h1>
+    <AppShell token={token}>
+      <div className="stack">
+        <h1>Orders</h1>
 
-      {error && (
-        <div className="card pill-danger" style={{ marginBottom: '1rem' }}>
-          <p>{error}</p>
-          <button onClick={() => refresh()}>Retry</button>
-        </div>
-      )}
+        {error != null && (
+          <Alert variant="danger" action={<button className="btn btn--secondary btn--sm" onClick={() => refresh()}>Try again</button>}>
+            {sellerMessage(error, 'Could not load your orders.')}
+          </Alert>
+        )}
 
-      {loading && orders.length === 0 && handoffs.length === 0 ? (
-        <p>Loading…</p>
-      ) : (
-        <>
-          <HandoffQueue handoffs={handoffs} token={token} onAction={refresh} />
-          {hero && <HeroOrder order={hero} token={token} onAction={refresh} />}
-          <OrderList orders={rest} token={token} onAction={refresh} />
-          {orders.length === 0 && <p>No orders yet.</p>}
-        </>
-      )}
-    </main>
+        {pendingUpdates > 0 && (
+          <button type="button" className="btn btn--secondary btn--block" onClick={applyPending}>
+            {pendingUpdates} new update{pendingUpdates === 1 ? '' : 's'} — Show
+          </button>
+        )}
+
+        {loading && orders.length === 0 && handoffs.length === 0 ? (
+          <PageSkeleton />
+        ) : (
+          <>
+            <FeedSection title="Needs you" count={handoffs.length} emptyTitle="Nothing waiting on you." emptyBody="Your assistant is handling buyers. It'll ask here when it's unsure.">
+              {handoffs.map((handoff) => (
+                <HandoffCard key={handoff._id} handoff={handoff} token={token} onAction={refresh} />
+              ))}
+            </FeedSection>
+
+            <FeedSection title="Orders" emptyTitle="No orders yet." emptyBody="When a buyer orders through your chat, it shows up here.">
+              {sortedOrders.map((order, index) => (
+                <OrderCard key={order._id} order={order} token={token} onPatched={patchOrder} emphasis={index === 0 && isUrgent(order)} />
+              ))}
+            </FeedSection>
+          </>
+        )}
+      </div>
+    </AppShell>
   );
 }
