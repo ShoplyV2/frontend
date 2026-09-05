@@ -139,65 +139,12 @@
   --tabbar-total: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
 }
 
-/* KEEP IN SYNC (1/2) — prefers-color-scheme */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    color-scheme: dark;
-
-    --color-canvas: #0c0e10;
-    --color-surface: #16191c;
-    --color-surface-sunken: #101315;
-    --color-surface-hover: #1f2428;
-    --color-overlay: rgb(0 0 0 / 0.62);
-
-    --color-text: #eceef0;
-    --color-text-secondary: #b2bac1;
-    --color-text-muted: #8c959d;
-    --color-text-inverse: #0c0e10;
-
-    --color-border-subtle: #1f2427;
-    --color-border: #2b3136;
-    --color-border-strong: #414951;
-
-    --color-accent: #5eead4;
-    --color-accent-fill: #14b8a6;
-    --color-accent-fill-hover: #2dd4bf;
-    --color-accent-fill-active: #0d9488;
-    --color-on-accent-fill: #04211d;
-    --color-accent-soft: #10312e;
-    --color-on-accent-soft: #7ee7d8;
-    --color-accent-border: #1d4f49;
-
-    --color-success: #6ee7a8;
-    --color-success-fill: #15a34a;
-    --color-on-success-fill: #04220f;
-    --color-success-soft: #0f2d1c;
-    --color-on-success-soft: #6ee7a8;
-    --color-success-border: #1c4d32;
-
-    --color-warning: #fbbf24;
-    --color-warning-fill: #d97706;
-    --color-on-warning-fill: #1c1102;
-    --color-warning-soft: #35250a;
-    --color-on-warning-soft: #fcd34d;
-    --color-warning-border: #5c421a;
-
-    --color-danger: #fca5a5;
-    --color-danger-fill: #dc2626;
-    --color-on-danger-fill: #ffffff;
-    --color-danger-soft: #3a1618;
-    --color-on-danger-soft: #fca5a5;
-    --color-danger-border: #632626;
-
-    --color-focus: #5eead4;
-    --color-focus-halo: #0c0e10;
-
-    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.04);
-    --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.05);
-  }
-}
-
-/* KEEP IN SYNC (2/2) — manual [data-theme] override, for a future toggle */
+/*
+ * Light mode only, for now — the app does not follow system dark mode.
+ * The dark palette below is kept as a manual [data-theme='dark'] override
+ * only, wired up to nothing yet, so a future explicit theme toggle can turn
+ * it on without redoing the palette work.
+ */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
