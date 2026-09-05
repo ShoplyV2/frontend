@@ -25,11 +25,9 @@ export const viewport: Viewport = {
   // Required for env(safe-area-inset-*) to resolve — every current iPhone
   // has a notch/Dynamic Island and a home indicator the fixed nav must clear.
   viewportFit: 'cover',
-  colorScheme: 'light dark',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f5f7f8' },
-    { media: '(prefers-color-scheme: dark)', color: '#0c0e10' },
-  ],
+  // Light mode only for now — see tokens.css. Revisit once a real theme toggle exists.
+  colorScheme: 'light',
+  themeColor: '#f5f7f8',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
