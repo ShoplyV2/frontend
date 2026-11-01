@@ -99,9 +99,9 @@ export interface ChannelSummary {
   displayName: string | null;
   sellerContactId: string | null;
   active: boolean;
-  // Non-null only for an unbound Telegram channel with a live binding window — a bot can never
-  // message its owner first, so this is how the seller finishes connecting: tapping it opens the
-  // bot and sends /start, which is what sets sellerContactId server-side.
+  // Non-null only for an unbound channel with a live binding window. Telegram: a t.me link that
+  // opens the bot and sends /start. WhatsApp: a wa.me link that prefills `owner_<nonce>`. Either
+  // way the seller's own message is what sets sellerContactId server-side.
   ownerBindingUrl: string | null;
 }
 

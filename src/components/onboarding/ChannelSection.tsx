@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { connectTelegramChannel, disconnectChannel } from '@/lib/apiClient';
+import { connectTelegramChannel, disconnectChannel, refreshOwnerBinding } from '@/lib/apiClient';
 import { sellerMessage } from '@/lib/errorMessage';
 import { channelFallbackName, CHANNEL_KIND } from '@/lib/labels';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -10,7 +10,7 @@ import { Alert } from '@/components/ui/Alert';
 import type { ChannelSummary } from '@/lib/types';
 
 function channelState(channel: ChannelSummary): { label: string; tone: 'warning' | 'success' | 'muted' } {
-  if (channel.ownerBindingUrl) return { label: 'Waiting for you to tap Start', tone: 'warning' };
+  if (channel.ownerBindingUrl) return { label: channel.kind === 'whatsapp' ? 'Waiting for you to send the message' : 'Waiting for you to tap Start', tone: 'warning' };
   if (channel.sellerContactId) return { label: 'Getting your alerts', tone: 'success' };
   return { label: 'Not receiving alerts', tone: 'muted' };
 }
@@ -21,6 +21,7 @@ export function ChannelSection({ token, channels, onChanged }: { token: string; 
   const [botToken, setBotToken] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+  const [refreshingId, setRefreshingId] = useState<string | null>(null);
   const [error, setError] = useState<unknown>(null);
 
   async function handleConnect(event: React.FormEvent) {
@@ -43,11 +44,24 @@ export function ChannelSection({ token, channels, onChanged }: { token: string; 
     }
   }
 
+  async function handleRefreshLink(channel: ChannelSummary) {
+    setRefreshingId(channel.routingId);
+    setError(null);
+    try {
+      await refreshOwnerBinding(token, channel.routingId);
+      onChanged();
+    } catch (err) {
+      setError(err);
+    } finally {
+      setRefreshingId(null);
+    }
+  }
+
   async function handleDisconnect(channel: ChannelSummary) {
     const name = channel.displayName ?? channelFallbackName(channel.kind);
     const ok = await confirm({
       title: `Disconnect ${name}?`,
-      body: "Buyers messaging this bot will stop getting replies, and you'll stop getting alerts here.",
+      body: channel.kind === 'whatsapp' ? "Buyers messaging this number will stop getting replies, and you'll stop getting alerts here." : "Buyers messaging this bot will stop getting replies, and you'll stop getting alerts here.",
       confirmLabel: 'Disconnect',
       tone: 'danger',
     });
@@ -88,13 +102,27 @@ export function ChannelSection({ token, channels, onChanged }: { token: string; 
               </div>
               {channel.ownerBindingUrl && (
                 <div className="card card--quiet stack stack--sm">
-                  <p>
-                    <strong>One last tap</strong> — Telegram bots can&apos;t message you first. Open your bot and tap Start so order alerts reach you.
-                  </p>
+                  {channel.kind === 'whatsapp' ? (
+                    <p>
+                      <strong>One last step</strong> — so order alerts reach you, open WhatsApp from the phone you want alerts on and send the message that&apos;s already typed in for you.
+                    </p>
+                  ) : (
+                    <p>
+                      <strong>One last tap</strong> — Telegram bots can&apos;t message you first. Open your bot and tap Start so order alerts reach you.
+                    </p>
+                  )}
                   <a href={channel.ownerBindingUrl} target="_blank" rel="noreferrer" className="btn btn--primary" style={{ alignSelf: 'flex-start' }}>
-                    Open Telegram and tap Start
+                    {channel.kind === 'whatsapp' ? 'Open WhatsApp and send' : 'Open Telegram and tap Start'}
                   </a>
-                  <p className="field-hint">This link works for 30 minutes. Connect again below to get a fresh one.</p>
+                  <p className="field-hint">This link works for 30 minutes.{channel.kind === 'telegram' ? ' Connect again below to get a fresh one.' : ''}</p>
+                </div>
+              )}
+              {channel.kind === 'whatsapp' && !channel.sellerContactId && !channel.ownerBindingUrl && (
+                <div className="card card--quiet stack stack--sm">
+                  <p>Your link has expired. Get a new one to start receiving order alerts on this phone.</p>
+                  <button type="button" className="btn btn--primary" style={{ alignSelf: 'flex-start' }} onClick={() => handleRefreshLink(channel)} disabled={refreshingId === channel.routingId}>
+                    {refreshingId === channel.routingId ? 'Getting link…' : 'Get a new link'}
+                  </button>
                 </div>
               )}
             </div>
@@ -117,7 +145,9 @@ export function ChannelSection({ token, channels, onChanged }: { token: string; 
         </button>
       </form>
 
-      <Alert variant="info">WhatsApp is set up by the Shoply team for now — message us and we&apos;ll connect yours.</Alert>
+      {!channels.some((c) => c.kind === 'whatsapp') && (
+        <Alert variant="info">WhatsApp is set up by the Shoply team for now — message us and we&apos;ll connect yours. Once it&apos;s connected, you&apos;ll see a link here to start getting alerts.</Alert>
+      )}
     </div>
   );
 }

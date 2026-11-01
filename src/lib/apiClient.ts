@@ -140,6 +140,10 @@ export function connectTelegramChannel(token: string, botToken: string): Promise
   return request(token, '/me/channels/telegram', { method: 'POST', body: JSON.stringify({ botToken }) });
 }
 
+export function refreshOwnerBinding(token: string, routingId: string): Promise<{ channel: ChannelSummary }> {
+  return request(token, `/me/channels/${encodeURIComponent(routingId)}/owner-binding`, { method: 'POST' });
+}
+
 export function disconnectChannel(token: string, routingId: string): Promise<{ deleted: boolean }> {
   return request(token, `/me/channels/${encodeURIComponent(routingId)}`, { method: 'DELETE' });
 }

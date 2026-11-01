@@ -96,7 +96,9 @@ export default function SellersPage() {
       ) : (
         <div className="grid">
           {sellers.map((seller) => {
-            const statusInfo = SELLER_STATUS[seller.status];
+            // Sellers created before `status` existed come back without one — treat an active one as
+            // open and anything else as still setting up, rather than crashing the whole list.
+            const statusInfo = SELLER_STATUS[seller.status ?? (seller.active ? 'LIVE' : 'ONBOARDING')];
             return (
               <div key={seller.id} className="card stack stack--sm">
                 <div className="split">
