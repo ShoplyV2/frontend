@@ -38,7 +38,7 @@ export function DeleteAccount({ token, onDeleted }: { token: string; onDeleted: 
   }
 
   return (
-    <div className="card stack stack--sm">
+    <div className="card card--danger stack stack--sm">
       <h2>Close your shop</h2>
       <p className="text-secondary">Your shop stops answering buyers and you&apos;re signed out. You can&apos;t sign back in or reuse this email.</p>
       <button type="button" className="btn btn--danger self-start" onClick={() => setOpen(true)}>

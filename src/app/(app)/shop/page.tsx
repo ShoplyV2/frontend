@@ -16,6 +16,14 @@ import { TelegramCard, WhatsAppCard } from '@/components/channels/ChannelCards';
 import { AccountSection } from '@/components/shop/AccountSection';
 import { DeleteAccount } from '@/components/shop/DeleteAccount';
 
+const SECTIONS = [
+  ['details', 'Shop details'],
+  ['chat', 'Chat apps'],
+  ['payments', 'Payments'],
+  ['link', 'Your shop link'],
+  ['account', 'Account'],
+] as const;
+
 export default function ShopPage() {
   const router = useRouter();
   const toast = useToast();
@@ -41,7 +49,7 @@ export default function ShopPage() {
   const statusInfo = profile ? SELLER_STATUS[profile.status] : null;
 
   return (
-    <Page width="narrow">
+    <Page width="wide">
       <div className="stack">
         <div className="split">
           <h1>Shop</h1>
@@ -59,44 +67,53 @@ export default function ShopPage() {
         ) : (
           profile &&
           state && (
-            <>
-              <section className="section">
-                <p className="section-title">Shop details</p>
-                <ProfileSection token={token} profile={profile} onSaved={refresh} />
-              </section>
+            <div className="shop-layout">
+              <nav className="subnav" aria-label="Shop sections">
+                {SECTIONS.map(([id, label]) => (
+                  <a key={id} href={`#${id}`} className="subnav-link">
+                    {label}
+                  </a>
+                ))}
+              </nav>
+              <div className="shop-sections stack">
+                <section className="section" id="details">
+                  <p className="section-title">Shop details</p>
+                  <ProfileSection token={token} profile={profile} onSaved={refresh} />
+                </section>
 
-              <section className="section">
-                <p className="section-title">Chat apps</p>
-                <div className="stack">
-                  <TelegramCard token={token} channel={channels.find((c) => c.kind === 'telegram')} refresh={refresh} canDisconnect />
-                  <WhatsAppCard token={token} channel={channels.find((c) => c.kind === 'whatsapp')} requestedAt={profile.whatsappRequestedAt} refresh={refresh} canDisconnect />
-                </div>
-              </section>
+                <section className="section" id="chat">
+                  <p className="section-title">Chat apps</p>
+                  <div className="stack">
+                    <TelegramCard token={token} channel={channels.find((c) => c.kind === 'telegram')} refresh={refresh} canDisconnect />
+                    <WhatsAppCard token={token} channel={channels.find((c) => c.kind === 'whatsapp')} requestedAt={profile.whatsappRequestedAt} refresh={refresh} canDisconnect />
+                  </div>
+                </section>
 
-              <section className="section">
-                <p className="section-title">Payments</p>
-                <PayoutSection token={token} payoutConfigured={state.payoutConfigured} onChanged={refresh} />
-              </section>
+                <section className="section" id="payments">
+                  <p className="section-title">Payments</p>
+                  <PayoutSection token={token} payoutConfigured={state.payoutConfigured} onChanged={refresh} />
+                </section>
 
-              <section className="section">
-                <p className="section-title">Your shop link</p>
-                <div className="card stack">
-                  <p className="text-secondary">Share this anywhere your buyers are: your Instagram bio, WhatsApp status, or a direct message.</p>
-                  <ShareLinks shopName={profile.shopName} channels={channels} />
-                </div>
-              </section>
+                <section className="section" id="link">
+                  <p className="section-title">Your shop link</p>
+                  <div className="card stack">
+                    <p className="text-secondary">Share this anywhere your buyers are: your Instagram bio, WhatsApp status, or a direct message.</p>
+                    <ShareLinks shopName={profile.shopName} channels={channels} />
+                  </div>
+                </section>
 
-              <section className="section">
-                <p className="section-title">Account</p>
-                <div className="stack">
-                  <AccountSection token={token} profile={profile} onSaved={refresh} onTokenChanged={setToken} />
-                  <button type="button" className="btn btn--secondary btn--block" onClick={handleSignOut}>
-                    Sign out
-                  </button>
-                  <DeleteAccount token={token} onDeleted={handleDeleted} />
-                </div>
-              </section>
-            </>
+                <section className="section" id="account">
+                  <p className="section-title">Account</p>
+                  <div className="stack">
+                    <AccountSection token={token} profile={profile} onSaved={refresh} onTokenChanged={setToken} />
+                    <button type="button" className="btn btn--secondary btn--block" onClick={handleSignOut}>
+                      Sign out
+                    </button>
+                    <DeleteAccount token={token} onDeleted={handleDeleted} />
+                  </div>
+                </section>
+              </div>
+            </div>
           )
         )}
       </div>
