@@ -55,8 +55,8 @@ export function PayoutSection({ token, payoutConfigured, onChanged }: { token: s
 
   return (
     <div id="payout" className="card stack">
-      <h2>Get paid to your bank</h2>
-      <p className="text-secondary">Optional. You can open your shop first — but buyer payments only reach your bank once this is set.</p>
+      <h2>Payments</h2>
+      <p className="text-secondary">Buyer payments only reach your bank once this is set.</p>
 
       {(payoutConfigured || saved) && (
         <Alert variant="success">{saved ? `Payouts go to ${saved.businessName} · ${saved.bankName} · ••••${saved.accountNumber.slice(-4)}` : 'Payout set up.'}</Alert>

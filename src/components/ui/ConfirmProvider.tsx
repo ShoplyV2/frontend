@@ -56,7 +56,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           <div className="sheet-panel stack">
             <h2>{options.title}</h2>
             <div className="text-secondary">{options.body}</div>
-            <div className="cluster cluster--end" style={{ marginTop: 'var(--space-2)' }}>
+            <div className="cluster cluster--end cluster--spaced">
               <button type="button" className="btn btn--secondary" onClick={() => close(false)}>
                 {options.cancelLabel ?? 'Cancel'}
               </button>

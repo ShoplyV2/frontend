@@ -4,6 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { DEFAULT_BASE_URL, getHandoffs, getOrders } from './apiClient';
 import type { FeedHandoff, FeedOrder } from './types';
 
+// Enough recent orders for Home's day totals and the Orders list, without paging.
+const FEED_ORDER_LIMIT = 200;
+
 interface FeedSnapshot {
   orders: FeedOrder[];
   handoffs: FeedHandoff[];
@@ -44,7 +47,7 @@ export function useFeedData(token: string | null) {
       if (isBackgroundRefresh) setRefreshing(true);
       else setLoading(true);
       try {
-        const [ordersRes, handoffsRes] = await Promise.all([getOrders(token), getHandoffs(token)]);
+        const [ordersRes, handoffsRes] = await Promise.all([getOrders(token, undefined, FEED_ORDER_LIMIT), getHandoffs(token)]);
         const snapshot: FeedSnapshot = { orders: ordersRes.orders, handoffs: handoffsRes.handoffs };
         if (isBackgroundRefresh && !safeToApplyNow()) {
           pendingSnapshot.current = snapshot;

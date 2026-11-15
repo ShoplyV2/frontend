@@ -19,60 +19,77 @@
   color-scheme: light;
 
   /* surfaces — layered so cards read as objects, not a colour-run canvas */
-  --color-canvas: #f5f7f8;
+  --color-canvas: #f6f6f7;
   --color-surface: #ffffff;
-  --color-surface-sunken: #eef1f3;
-  --color-surface-hover: #f2f5f6;
-  --color-overlay: rgb(12 18 22 / 0.45);
+  --color-surface-sunken: #f1f1f3;
+  --color-surface-hover: #f4f4f5;
+  --color-overlay: rgb(24 24 27 / 0.45);
 
-  /* text hierarchy */
-  --color-text: #101619;
-  --color-text-secondary: #495963;
-  --color-text-muted: #66757f;
+  /* text hierarchy — muted is #71717a to match the design: 4.83:1 on white, ~4.47:1 on the canvas
+     (0.03 under AA), so put muted text on white surfaces where you can */
+  --color-text: #18181b;
+  --color-text-secondary: #52525b;
+  --color-text-muted: #71717a;
   --color-text-inverse: #ffffff;
 
-  /* borders */
-  --color-border-subtle: #e6eaed;
-  --color-border: #d5dbe0;
-  --color-border-strong: #adb8c0;
+  /* borders — `border` is what inputs use (visible), `border-subtle` is cards and dividers */
+  --color-border-subtle: #e4e4e7;
+  --color-border: #d4d4d8;
+  --color-border-strong: #b4b4bc;
 
-  /* accent — Shoply teal */
-  --color-accent: #0f766e;
-  --color-accent-fill: #0f766e;
-  --color-accent-fill-hover: #115e59;
-  --color-accent-fill-active: #134e4a;
+  /* primary — near-black. The main action on a screen is ink, not the accent, so the accent
+     stays rare enough to mean "look here". */
+  --color-primary-fill: #18181b;
+  --color-primary-fill-hover: #27272a;
+  --color-primary-fill-active: #3f3f46;
+  --color-on-primary-fill: #ffffff;
+
+  /* accent — Shoply cobalt: links, progress, selection, "to send", the logo dot */
+  --color-accent: #2f54a8;
+  --color-accent-fill: #2f54a8;
+  --color-accent-fill-hover: #264489;
+  --color-accent-fill-active: #1f376f;
   --color-on-accent-fill: #ffffff;
-  --color-accent-soft: #d6efec;
-  --color-on-accent-soft: #0a544d;
-  --color-accent-border: #8fd0c9;
+  --color-accent-soft: #e9eef8;
+  --color-on-accent-soft: #254283;
+  --color-accent-border: #b5c4e6;
+  /* translucent accent for chips and badges, so it sits on white or on grey */
+  --color-accent-tint: rgb(47 84 168 / 0.12);
+  --color-accent-tint-soft: rgb(47 84 168 / 0.1);
 
-  /* semantic */
-  --color-success: #146c43;
-  --color-success-fill: #146c43;
+  /* warm placeholders for items with no photo yet */
+  --color-photo-1: #efe7dc;
+  --color-photo-2: #f1e6da;
+  --color-photo-3: #ece9e2;
+  --color-photo-4: #ededef;
+
+  /* semantic. Positive states ("paid", "connected", "open") use the accent family with a check
+     icon rather than green: the product's look has no green, and an icon carries the meaning. */
+  --color-success: #2f54a8;
+  --color-success-fill: #2f54a8;
   --color-on-success-fill: #ffffff;
-  --color-success-soft: #d7f0e2;
-  --color-on-success-soft: #0c4b2e;
-  --color-success-border: #8fd5b1;
+  --color-success-soft: #e9eef8;
+  --color-on-success-soft: #254283;
+  --color-success-border: #b5c4e6;
 
-  --color-warning: #b45309;
+  --color-warning: #92400e;
   --color-warning-fill: #b45309;
   --color-on-warning-fill: #ffffff;
-  --color-warning-soft: #fceccd;
-  --color-on-warning-soft: #7a3c05;
-  --color-warning-border: #e8bd77;
+  --color-warning-soft: #fef3c7;
+  --color-on-warning-soft: #92400e;
+  --color-warning-border: #f0d98a;
 
-  --color-danger: #b91c1c;
-  --color-danger-fill: #b91c1c;
+  --color-danger: #b42318;
+  --color-danger-fill: #b42318;
   --color-on-danger-fill: #ffffff;
-  --color-danger-soft: #fbe1e1;
-  --color-on-danger-soft: #8d1616;
-  --color-danger-border: #eda6a6;
+  --color-danger-soft: #fdecea;
+  --color-on-danger-soft: #8a1a11;
+  --color-danger-border: #f1c9c4;
 
-  --color-focus: #0d5f58;
+  --color-focus: #2f54a8;
   --color-focus-halo: #ffffff;
 
-  --shadow-sm: 0 1px 2px rgb(12 18 22 / 0.06), 0 1px 3px rgb(12 18 22 / 0.08);
-  --shadow-md: 0 2px 4px rgb(12 18 22 / 0.06), 0 12px 24px -8px rgb(12 18 22 / 0.16);
+  --shadow-md: 0 4px 12px -2px rgb(24 24 27 / 0.08), 0 12px 24px -8px rgb(24 24 27 / 0.14);
 
   /* spacing — 4px base */
   --space-0: 0;
@@ -87,35 +104,40 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* type — size / line-height pairs */
+  /* type — size / line-height pairs. Body is 14px (the design's scale); 15px is for inputs
+     on desktop and lead paragraphs, 16px for list-panel headings. */
   --text-2xs: 0.6875rem;
   --leading-2xs: 1rem;
   --text-xs: 0.75rem;
   --leading-xs: 1.125rem;
-  --text-sm: 0.875rem;
-  --leading-sm: 1.3125rem;
-  --text-base: 1rem;
-  --leading-base: 1.5rem;
-  --text-lg: 1.125rem;
-  --leading-lg: 1.625rem;
-  --text-xl: 1.25rem;
-  --leading-xl: 1.75rem;
+  --text-sm: 0.8125rem;
+  --leading-sm: 1.25rem;
+  --text-base: 0.875rem;
+  --leading-base: 1.3125rem;
+  --text-md: 0.9375rem;
+  --leading-md: 1.4375rem;
+  --text-lg: 1rem;
+  --leading-lg: 1.5rem;
+  --text-xl: 1.125rem;
+  --leading-xl: 1.625rem;
   --text-2xl: 1.5rem;
-  --leading-2xl: 1.9375rem;
-  --text-3xl: 1.875rem;
-  --leading-3xl: 2.25rem;
+  --leading-2xl: 1.875rem;
+  --text-3xl: 1.625rem;
+  --leading-3xl: 2rem;
+  --text-4xl: 2rem;
+  --leading-4xl: 2.25rem;
 
   --weight-normal: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
-  --tracking-tight: -0.011em;
-  --tracking-wide: 0.02em;
+  --tracking-tight: -0.025em;
+  --tracking-tighter: -0.03em;
 
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-lg: 12px;
   --radius-xl: 20px;
   --radius-full: 999px;
 
@@ -131,12 +153,30 @@
   --z-toast: 400;
 
   --tap-min: 44px;
+  /* control sizes: touch-sized on phones, the design's tighter sizes where there is a mouse */
+  --control-min: var(--tap-min);
+  --btn-h: 2.75rem;
+  --input-h: 3rem;
+  --input-fs: 1rem; /* MUST stay >= 16px below 900px — iOS Safari zooms on focus otherwise */
   --tabbar-h: 56px;
   --sidebar-w: 240px;
   --page-max: 68rem;
   --page-max-narrow: 30rem;
-  --page-max-wide: 82rem;
+  --page-max-wide: 80rem;
   --tabbar-total: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 900px) {
+  :root {
+    --input-h: 2.875rem;
+    --input-fs: 0.9375rem; /* 15px is safe: iOS zoom only matters on phones */
+  }
+}
+@media (min-width: 900px) and (pointer: fine) {
+  :root {
+    --control-min: 2.5rem;
+    --btn-h: 2.5rem;
+  }
 }
 
 /*
@@ -163,21 +203,32 @@
   --color-border: #2b3136;
   --color-border-strong: #414951;
 
-  --color-accent: #5eead4;
-  --color-accent-fill: #14b8a6;
-  --color-accent-fill-hover: #2dd4bf;
-  --color-accent-fill-active: #0d9488;
-  --color-on-accent-fill: #04211d;
-  --color-accent-soft: #10312e;
-  --color-on-accent-soft: #7ee7d8;
-  --color-accent-border: #1d4f49;
+  --color-primary-fill: #ececef;
+  --color-primary-fill-hover: #ffffff;
+  --color-primary-fill-active: #d4d4d8;
+  --color-on-primary-fill: #18181b;
 
-  --color-success: #6ee7a8;
-  --color-success-fill: #15a34a;
-  --color-on-success-fill: #04220f;
-  --color-success-soft: #0f2d1c;
-  --color-on-success-soft: #6ee7a8;
-  --color-success-border: #1c4d32;
+  --color-accent: #9db6ef;
+  --color-accent-fill: #4d73cf;
+  --color-accent-fill-hover: #6b8fdc;
+  --color-accent-fill-active: #3f62b8;
+  --color-on-accent-fill: #ffffff;
+  --color-accent-soft: #1a2644;
+  --color-on-accent-soft: #b8caf5;
+  --color-accent-border: #2c3f73;
+  --color-accent-tint: rgb(157 182 239 / 0.16);
+  --color-accent-tint-soft: rgb(157 182 239 / 0.12);
+  --color-photo-1: #2a2620;
+  --color-photo-2: #2c2620;
+  --color-photo-3: #26251f;
+  --color-photo-4: #25252a;
+
+  --color-success: #9db6ef;
+  --color-success-fill: #4d73cf;
+  --color-on-success-fill: #ffffff;
+  --color-success-soft: #1a2644;
+  --color-on-success-soft: #b8caf5;
+  --color-success-border: #2c3f73;
 
   --color-warning: #fbbf24;
   --color-warning-fill: #d97706;
@@ -193,9 +244,8 @@
   --color-on-danger-soft: #fca5a5;
   --color-danger-border: #632626;
 
-  --color-focus: #5eead4;
+  --color-focus: #9db6ef;
   --color-focus-halo: #0c0e10;
 
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.04);
   --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.05);
 }

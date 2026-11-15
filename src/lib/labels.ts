@@ -5,20 +5,39 @@ import type { ChannelKind, HandoffReason, OrderStatus, SellerStatus } from './ty
 
 export type Tone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'muted';
 
-export const ORDER_STATUS: Record<OrderStatus, { label: string; tone: Tone; hint: string }> = {
-  DRAFT: { label: 'Not confirmed yet', tone: 'muted', hint: "The buyer hasn't finished ordering." },
-  AWAITING_PAYMENT: { label: 'Waiting for payment', tone: 'warning', hint: 'Stock is held for this buyer until they pay.' },
-  PAID: { label: 'Paid — ready to send', tone: 'success', hint: 'Money received. Pack it and send it out.' },
-  DISPATCHED: { label: 'On the way', tone: 'info', hint: 'Sent to the buyer.' },
-  DELIVERED: { label: 'Delivered', tone: 'muted', hint: 'Done.' },
-  CANCELLED: { label: 'Cancelled', tone: 'danger', hint: "This order won't go ahead." },
-  EXPIRED: { label: 'Expired', tone: 'danger', hint: "The buyer didn't pay in time. Stock is back." },
+// `chip` is the short form for dense lists; `label` is the full phrase for a detail view.
+export const ORDER_STATUS: Record<OrderStatus, { label: string; chip: string; tone: Tone; hint: string }> = {
+  DRAFT: { label: 'Not confirmed yet', chip: 'Draft', tone: 'muted', hint: "The buyer hasn't finished ordering." },
+  AWAITING_PAYMENT: { label: 'Waiting for payment', chip: 'Unpaid', tone: 'warning', hint: 'Stock is held for this buyer until they pay.' },
+  PAID: { label: 'Paid — ready to send', chip: 'To send', tone: 'success', hint: 'Money received. Pack it and send it out.' },
+  DISPATCHED: { label: 'On the way', chip: 'On the way', tone: 'info', hint: 'Sent to the buyer.' },
+  DELIVERED: { label: 'Delivered', chip: 'Delivered', tone: 'muted', hint: 'Done.' },
+  CANCELLED: { label: 'Cancelled', chip: 'Cancelled', tone: 'danger', hint: "This order won't go ahead." },
+  EXPIRED: { label: 'Expired', chip: 'Expired', tone: 'danger', hint: "The buyer didn't pay in time. Stock is back." },
 };
+
+// How a buyer paid, from Paystack's `channel` on the verified transaction.
+const PAYMENT_CHANNEL: Record<string, string> = {
+  card: 'Card',
+  mobile_money: 'Mobile money',
+  bank: 'Bank',
+  bank_transfer: 'Bank transfer',
+  ussd: 'USSD',
+  qr: 'QR code',
+  eft: 'EFT',
+  apple_pay: 'Apple Pay',
+};
+
+export function paymentChannelLabel(channel: string | null): string {
+  if (!channel) return 'Paystack';
+  return PAYMENT_CHANNEL[channel] ?? channel.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+}
 
 export const SELLER_STATUS: Record<SellerStatus, { label: string; tone: Tone }> = {
   ONBOARDING: { label: 'Setting up', tone: 'warning' },
   LIVE: { label: 'Open for orders', tone: 'success' },
   SUSPENDED: { label: 'Paused', tone: 'danger' },
+  DELETED: { label: 'Closed', tone: 'muted' },
 };
 
 export const CHANNEL_KIND: Record<ChannelKind, string> = {
