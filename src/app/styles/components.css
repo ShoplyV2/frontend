@@ -682,3 +682,20 @@
 .wordmark--lg {
   font-size: 2rem;
 }
+
+/* Shell controls that must beat .btn's display. They live here, after .btn, because the components
+   layer outranks the layout layer. */
+.topbar-add {
+  display: none;
+}
+.search--expanded .search-toggle {
+  display: none;
+}
+@media (min-width: 900px) {
+  .topbar-add {
+    display: inline-flex;
+  }
+  .search-toggle {
+    display: none;
+  }
+}

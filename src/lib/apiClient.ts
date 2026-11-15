@@ -57,8 +57,11 @@ async function requestMultipart<T>(token: string, path: string, formData: FormDa
   return response.json() as Promise<T>;
 }
 
-export function getOrders(token: string, status?: string): Promise<{ orders: FeedOrder[] }> {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+export function getOrders(token: string, status?: string, limit?: number): Promise<{ orders: FeedOrder[] }> {
+  const params = new URLSearchParams();
+  if (status) params.set('status', status);
+  if (limit) params.set('limit', String(limit));
+  const query = params.size > 0 ? `?${params.toString()}` : '';
   return request(token, `/feed/orders${query}`);
 }
 

@@ -3,7 +3,6 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useFeedToken } from '@/lib/useFeedToken';
 import { useCatalog } from '@/lib/useCatalog';
 import { sellerMessage } from '@/lib/errorMessage';
 import { PHOTO_PROCESSING } from '@/lib/labels';
@@ -18,8 +17,8 @@ import {
   setVariantStock,
   updateCatalogItem,
 } from '@/lib/apiClient';
-import { RequireLogin } from '@/components/RequireLogin';
-import { AppShell } from '@/components/shell/AppShell';
+import { Page } from '@/components/shell/Page';
+import { useShop } from '@/components/shell/ShopProvider';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
 import { MenuButton } from '@/components/ui/MenuButton';
@@ -35,21 +34,13 @@ export default function ItemDetailPage() {
   const router = useRouter();
   const confirm = useConfirm();
   const toast = useToast();
-  const { token, hydrated } = useFeedToken();
+  const { token } = useShop();
   const { items, loading, error, refresh, replaceItem, patchItem } = useCatalog(token);
   const [pending, setPending] = useState<Set<string>>(new Set());
   const [rowError, setRowError] = useState<string | null>(null);
   const [addingImage, setAddingImage] = useState(false);
   const pendingDeltas = useRef<Map<string, { total: number; rollback: () => void; timer: ReturnType<typeof setTimeout> }>>(new Map());
 
-  if (!hydrated) {
-    return (
-      <div className="page">
-        <PageSkeleton />
-      </div>
-    );
-  }
-  if (!token) return <RequireLogin />;
 
   const item = items.find((i) => i.id === params.id);
 
@@ -178,27 +169,27 @@ export default function ItemDetailPage() {
 
   if (loading && !item) {
     return (
-      <AppShell token={token}>
+      <Page>
         <PageSkeleton />
-      </AppShell>
+      </Page>
     );
   }
 
   if (!item) {
     return (
-      <AppShell token={token}>
+      <Page>
         <div className="empty-state">
           <p className="empty-state-title">That item isn&apos;t here any more.</p>
           <Link href="/catalog" className="btn btn--secondary">
             Back to catalog
           </Link>
         </div>
-      </AppShell>
+      </Page>
     );
   }
 
   return (
-    <AppShell token={token}>
+    <Page>
       <div className="stack">
         <div className="cluster">
           <button type="button" className="btn btn--ghost btn--icon" onClick={() => router.push('/catalog')} aria-label="Back to catalog">
@@ -279,7 +270,7 @@ export default function ItemDetailPage() {
           {item.available ? 'Hide from buyers' : 'Make available'}
         </button>
       </div>
-    </AppShell>
+    </Page>
   );
 }
 

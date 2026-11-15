@@ -2,32 +2,22 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useFeedToken } from '@/lib/useFeedToken';
 import { useCatalog } from '@/lib/useCatalog';
 import { sellerMessage } from '@/lib/errorMessage';
 import { CATALOG_WARNING } from '@/lib/labels';
 import { ItemTile } from '@/components/catalog/ItemTile';
-import { RequireLogin } from '@/components/RequireLogin';
-import { AppShell } from '@/components/shell/AppShell';
-import { PageSkeleton } from '@/components/ui/PageSkeleton';
+import { Page } from '@/components/shell/Page';
+import { useShop } from '@/components/shell/ShopProvider';
 import { Alert } from '@/components/ui/Alert';
 
 export default function CatalogPage() {
-  const { token, hydrated } = useFeedToken();
+  const { token } = useShop();
   const { items, warnings, loading, error, refresh } = useCatalog(token);
   const [warningDismissed, setWarningDismissed] = useState(false);
 
-  if (!hydrated) {
-    return (
-      <div className="page">
-        <PageSkeleton />
-      </div>
-    );
-  }
-  if (!token) return <RequireLogin />;
 
   return (
-    <AppShell token={token} pageWidth="wide">
+    <Page width="wide">
       <div className="stack">
         <div className="split">
           <h1>Your catalog</h1>
@@ -77,6 +67,6 @@ export default function CatalogPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </Page>
   );
 }

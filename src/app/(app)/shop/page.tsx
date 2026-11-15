@@ -1,12 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useFeedToken } from '@/lib/useFeedToken';
 import { useOnboarding } from '@/lib/useOnboarding';
 import { sellerMessage } from '@/lib/errorMessage';
 import { SELLER_STATUS } from '@/lib/labels';
-import { RequireLogin } from '@/components/RequireLogin';
-import { AppShell } from '@/components/shell/AppShell';
+import { Page } from '@/components/shell/Page';
+import { useShop } from '@/components/shell/ShopProvider';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -20,17 +19,13 @@ import { DeleteAccount } from '@/components/shop/DeleteAccount';
 export default function ShopPage() {
   const router = useRouter();
   const toast = useToast();
-  const { token, setToken, hydrated } = useFeedToken();
-  const { profile, state, channels, loading, error, refresh } = useOnboarding(token);
+  const { token, setToken, refresh: refreshShop } = useShop();
+  const { profile, state, channels, loading, error, refresh: refreshSetup } = useOnboarding(token);
+  // The sidebar shows the shop name and chat-app status, so a change here has to reach it too.
+  const refresh = async () => {
+    await Promise.all([refreshSetup(), refreshShop()]);
+  };
 
-  if (!hydrated) {
-    return (
-      <div className="page">
-        <PageSkeleton />
-      </div>
-    );
-  }
-  if (!token) return <RequireLogin />;
 
   function handleSignOut() {
     setToken(null);
@@ -46,7 +41,7 @@ export default function ShopPage() {
   const statusInfo = profile ? SELLER_STATUS[profile.status] : null;
 
   return (
-    <AppShell token={token} pageWidth="narrow">
+    <Page width="narrow">
       <div className="stack">
         <div className="split">
           <h1>Shop</h1>
@@ -105,6 +100,6 @@ export default function ShopPage() {
           )
         )}
       </div>
-    </AppShell>
+    </Page>
   );
 }

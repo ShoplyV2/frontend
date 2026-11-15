@@ -3,13 +3,12 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useFeedToken } from '@/lib/useFeedToken';
 import { useOnboarding } from '@/lib/useOnboarding';
 import { useFeedData } from '@/lib/useFeedData';
 import { sellerMessage } from '@/lib/errorMessage';
 import { isUrgent, sortByPriority } from '@/lib/orderPriority';
-import { RequireLogin } from '@/components/RequireLogin';
-import { AppShell } from '@/components/shell/AppShell';
+import { Page } from '@/components/shell/Page';
+import { useShop } from '@/components/shell/ShopProvider';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
 import { ShareLinks } from '@/components/ShareLinks';
@@ -30,7 +29,7 @@ function isActive(order: FeedOrder): boolean {
 
 export default function HomePage() {
   const router = useRouter();
-  const { token, hydrated } = useFeedToken();
+  const { token } = useShop();
   const setup = useOnboarding(token);
   const { profile, state, channels } = setup;
 
@@ -45,21 +44,13 @@ export default function HomePage() {
     if (needsSetup) router.replace('/welcome');
   }, [needsSetup, router]);
 
-  if (!hydrated) {
-    return (
-      <div className="page">
-        <PageSkeleton />
-      </div>
-    );
-  }
-  if (!token) return <RequireLogin />;
 
   const ready = isLive && profile && state;
   const activeOrders = sortByPriority(feed.orders).filter(isActive);
   const shownOrders = activeOrders.slice(0, HOME_ORDER_LIMIT);
 
   return (
-    <AppShell token={token}>
+    <Page>
       <div className="stack">
         <h1>Home</h1>
 
@@ -101,7 +92,7 @@ export default function HomePage() {
               ))}
             </FeedSection>
             {feed.orders.length > 0 && (
-              <Link href="/feed" className="btn btn--secondary btn--block">
+              <Link href="/orders" className="btn btn--secondary btn--block">
                 {activeOrders.length > HOME_ORDER_LIMIT ? `See all ${activeOrders.length} active orders` : 'See all orders'}
               </Link>
             )}
@@ -118,6 +109,6 @@ export default function HomePage() {
           </>
         )}
       </div>
-    </AppShell>
+    </Page>
   );
 }

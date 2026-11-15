@@ -21,7 +21,7 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       { name: 'Home', short_name: 'Home', url: '/home' },
-      { name: 'Orders & handoffs', short_name: 'Orders', url: '/feed' },
+      { name: 'Orders & handoffs', short_name: 'Orders', url: '/orders' },
       { name: 'Catalog', short_name: 'Catalog', url: '/catalog' },
     ],
   };
