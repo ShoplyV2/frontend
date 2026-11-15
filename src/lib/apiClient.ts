@@ -1,4 +1,4 @@
-import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus } from './types';
+import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus, TranscriptMessage } from './types';
 
 export const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
@@ -63,6 +63,10 @@ export function getOrders(token: string, status?: string, limit?: number): Promi
   if (limit) params.set('limit', String(limit));
   const query = params.size > 0 ? `?${params.toString()}` : '';
   return request(token, `/feed/orders${query}`);
+}
+
+export function getConversationMessages(token: string, conversationId: string): Promise<{ messages: TranscriptMessage[] }> {
+  return request(token, `/feed/conversations/${encodeURIComponent(conversationId)}/messages`);
 }
 
 export function getHandoffs(token: string, status?: string): Promise<{ handoffs: FeedHandoff[] }> {

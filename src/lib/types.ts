@@ -14,6 +14,7 @@ export type HandoffStatus = 'PENDING' | 'ANSWERED' | 'TIMED_OUT' | 'ESCALATED' |
 
 export interface FeedOrder {
   _id: string;
+  conversationId: string;
   buyer: {
     waId: string;
     phone: string;
@@ -48,6 +49,7 @@ export interface FeedOrder {
   payment: {
     channel: string | null;
     paidAt: string | null;
+    amountPaid: number | null; // minor units
   };
   fulfillmentRisk: 'STOCK_LOST' | null;
   createdAt: string;
@@ -55,6 +57,7 @@ export interface FeedOrder {
 
 export interface FeedHandoff {
   _id: string;
+  conversationId: string;
   reason: HandoffReason;
   buyerQuestion: string;
   suggestedReply: string | null;
@@ -163,4 +166,13 @@ export interface NewVariantInput {
   stock: number;
   priceMajor?: number | null;
   sku?: string | null;
+}
+
+/** One line of a buyer–shop chat, as GET /feed/conversations/:id/messages returns it. */
+export interface TranscriptMessage {
+  role: 'buyer' | 'assistant';
+  text: string;
+  at: string;
+  /** The buyer attached a photo (shown as a placeholder, the image itself isn't served). */
+  hasMedia: boolean;
 }

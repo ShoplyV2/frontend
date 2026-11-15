@@ -1,34 +1,28 @@
 'use client';
 
-import { useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboarding } from '@/lib/useOnboarding';
 import { useFeedData } from '@/lib/useFeedData';
 import { sellerMessage } from '@/lib/errorMessage';
-import { isUrgent, sortByPriority } from '@/lib/orderPriority';
+import { buildQueue, filterQueue, type QueueFilter } from '@/lib/queue';
+import { useMediaQuery } from '@/lib/useMediaQuery';
 import { Page } from '@/components/shell/Page';
 import { useShop } from '@/components/shell/ShopProvider';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
 import { ShareLinks } from '@/components/ShareLinks';
-import { FeedSection } from '@/components/feed/FeedSection';
-import { OrderCard } from '@/components/feed/OrderCard';
-import { HandoffCard } from '@/components/feed/HandoffCard';
+import { QueueList } from '@/components/home/QueueList';
+import { QueueDetail } from '@/components/home/QueueDetail';
+import { StatsStrip } from '@/components/home/StatsStrip';
+import { Sheet } from '@/components/ui/Sheet';
 import { FinishSetup } from '@/components/home/FinishSetup';
-import type { FeedOrder } from '@/lib/types';
-
-// How many orders Home shows before pointing at the full list on the Orders tab.
-const HOME_ORDER_LIMIT = 3;
-
-// Orders a seller still has to do something about or keep an eye on; finished and dead ones stay on
-// the Orders tab.
-function isActive(order: FeedOrder): boolean {
-  return order.status === 'PAID' || order.status === 'AWAITING_PAYMENT' || order.status === 'DISPATCHED' || order.fulfillmentRisk === 'STOCK_LOST';
-}
 
 export default function HomePage() {
   const router = useRouter();
+  const isWide = useMediaQuery('(min-width: 900px)');
+  const [filter, setFilter] = useState<QueueFilter>('all');
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const { token } = useShop();
   const setup = useOnboarding(token);
   const { profile, state, channels } = setup;
@@ -46,11 +40,16 @@ export default function HomePage() {
 
 
   const ready = isLive && profile && state;
-  const activeOrders = sortByPriority(feed.orders).filter(isActive);
-  const shownOrders = activeOrders.slice(0, HOME_ORDER_LIMIT);
+  const queue = buildQueue(feed.orders, feed.handoffs);
+  const visible = filterQueue(queue, filter);
+  // Wide screens always show a detail pane, defaulting to the first item. A phone shows the list
+  // until the seller taps something, so nothing is selected for them until then.
+  const selected = queue.find((q) => q.key === selectedKey && visible.includes(q)) ?? (isWide ? visible[0] : undefined) ?? null;
+
+  const detail = selected && token ? <QueueDetail key={selected.key} item={selected} token={token} onAction={feed.refresh} onPatched={feed.patchOrder} /> : null;
 
   return (
-    <Page>
+    <Page width="wide">
       <div className="stack">
         <h1>Home</h1>
 
@@ -75,26 +74,16 @@ export default function HomePage() {
           <PageSkeleton />
         ) : (
           <>
-            <FeedSection title="Needs you" count={feed.handoffs.length} emptyTitle="Nothing waiting on you." emptyBody="Your assistant is handling buyers. It'll ask here when it's unsure.">
-              {feed.handoffs.map((handoff) => (
-                <HandoffCard key={handoff._id} handoff={handoff} token={token} onAction={feed.refresh} />
-              ))}
-            </FeedSection>
+            <StatsStrip orders={feed.orders} />
 
-            <FeedSection
-              title="Orders"
-              count={activeOrders.length}
-              emptyTitle="No orders to handle."
-              emptyBody="When a buyer orders through your chat, it shows up here."
-            >
-              {shownOrders.map((order, index) => (
-                <OrderCard key={order._id} order={order} token={token} onPatched={feed.patchOrder} emphasis={index === 0 && isUrgent(order)} />
-              ))}
-            </FeedSection>
-            {feed.orders.length > 0 && (
-              <Link href="/orders" className="btn btn--secondary btn--block">
-                {activeOrders.length > HOME_ORDER_LIMIT ? `See all ${activeOrders.length} active orders` : 'See all orders'}
-              </Link>
+            <div className="home-grid">
+              <QueueList queue={queue} filter={filter} onFilter={setFilter} selectedKey={selected?.key ?? null} onSelect={setSelectedKey} />
+              {isWide && <div className="home-detail">{detail ?? <p className="text-muted">Pick something from the list to see it here.</p>}</div>}
+            </div>
+            {!isWide && (
+              <Sheet open={selected != null} onClose={() => setSelectedKey(null)} title="Details">
+                {detail}
+              </Sheet>
             )}
 
             <FinishSetup token={token} profile={profile} state={state} channels={channels} refresh={setup.refresh} />
