@@ -7,7 +7,7 @@ import { signupSeller } from '@/lib/apiClient';
 import { authMessage } from '@/lib/errorMessage';
 import { useFeedToken } from '@/lib/useFeedToken';
 import { PasswordField } from '@/components/auth/PasswordField';
-import { Wordmark } from '@/components/ui/Wordmark';
+import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Alert } from '@/components/ui/Alert';
 
 const MIN_PASSWORD_LENGTH = 8; // mirrors backend/src/lib/password.ts
@@ -48,63 +48,55 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="page page--narrow page--centered">
-      <div className="card stack">
-        <div className="stack stack--xs">
-          <Wordmark size="md" />
-          <h1>Create your shop</h1>
-          <p className="text-secondary">It takes a few minutes. You can finish setting up after.</p>
-        </div>
+    <AuthLayout variant="signup" title="Create your shop" subtitle="It takes a few minutes. You can finish setting up after.">
+      {error && <Alert variant="danger">{error}</Alert>}
 
-        {error && <Alert variant="danger">{error}</Alert>}
-
-        <form onSubmit={handleSubmit} className="stack">
-          <div className="field">
-            <label className="field-label" htmlFor="signup-shop-name">
-              Shop name
-            </label>
-            <input
-              id="signup-shop-name"
-              className="input"
-              type="text"
-              value={shopName}
-              onChange={(event) => setShopName(event.target.value)}
-              placeholder="e.g. Ama's Boutique"
-              autoFocus
-            />
-          </div>
-          <div className="field">
-            <label className="field-label" htmlFor="signup-email">
-              Email
-            </label>
-            <input
-              id="signup-email"
-              className="input"
-              type="email"
-              inputMode="email"
-              autoComplete="username"
-              autoCapitalize="none"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </div>
-          <PasswordField
-            id="signup-password"
-            label="Password"
-            value={password}
-            onChange={setPassword}
-            autoComplete="new-password"
-            hint={`At least ${MIN_PASSWORD_LENGTH} characters.`}
+      <form onSubmit={handleSubmit} className="stack">
+        <div className="field">
+          <label className="field-label" htmlFor="signup-shop-name">
+            Shop name
+          </label>
+          <input
+            id="signup-shop-name"
+            className="input"
+            type="text"
+            value={shopName}
+            onChange={(event) => setShopName(event.target.value)}
+            placeholder="e.g. Ama's Boutique"
+            autoFocus
           />
-          <button type="submit" className="btn btn--primary" disabled={submitting || !canSubmit}>
-            {submitting ? 'Creating…' : 'Create my shop'}
-          </button>
-        </form>
+        </div>
+        <div className="field">
+          <label className="field-label" htmlFor="signup-email">
+            Email
+          </label>
+          <input
+            id="signup-email"
+            className="input"
+            type="email"
+            inputMode="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </div>
+        <PasswordField
+          id="signup-password"
+          label="Password"
+          value={password}
+          onChange={setPassword}
+          autoComplete="new-password"
+          hint={`At least ${MIN_PASSWORD_LENGTH} characters.`}
+        />
+        <button type="submit" className="btn btn--primary" disabled={submitting || !canSubmit}>
+          {submitting ? 'Creating…' : 'Create my shop'}
+        </button>
+      </form>
 
-        <p className="text-sm">
-          Already have a shop? <Link href="/login">Sign in</Link>
-        </p>
-      </div>
-    </main>
+      <p className="text-sm">
+        Already have a shop? <Link href="/login">Sign in</Link>
+      </p>
+    </AuthLayout>
   );
 }

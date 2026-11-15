@@ -7,7 +7,7 @@ import { loginSeller } from '@/lib/apiClient';
 import { authMessage } from '@/lib/errorMessage';
 import { useFeedToken } from '@/lib/useFeedToken';
 import { PasswordField } from '@/components/auth/PasswordField';
-import { Wordmark } from '@/components/ui/Wordmark';
+import { AuthLayout } from '@/components/auth/AuthLayout';
 import { Alert } from '@/components/ui/Alert';
 
 export default function LoginPage() {
@@ -37,43 +37,35 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="page page--narrow page--centered">
-      <div className="card stack">
-        <div className="stack stack--xs">
-          <Wordmark size="md" />
-          <h1>Welcome back</h1>
-          <p className="text-secondary">Sign in to your shop.</p>
+    <AuthLayout variant="login" title="Welcome back" subtitle="Sign in to your shop.">
+      {error && <Alert variant="danger">{error}</Alert>}
+
+      <form onSubmit={handleSubmit} className="stack">
+        <div className="field">
+          <label className="field-label" htmlFor="login-email">
+            Email
+          </label>
+          <input
+            id="login-email"
+            className="input"
+            type="email"
+            inputMode="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoFocus
+          />
         </div>
+        <PasswordField id="login-password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" />
+        <button type="submit" className="btn btn--primary" disabled={submitting || !email.trim() || !password}>
+          {submitting ? 'Signing in…' : 'Sign in'}
+        </button>
+      </form>
 
-        {error && <Alert variant="danger">{error}</Alert>}
-
-        <form onSubmit={handleSubmit} className="stack">
-          <div className="field">
-            <label className="field-label" htmlFor="login-email">
-              Email
-            </label>
-            <input
-              id="login-email"
-              className="input"
-              type="email"
-              inputMode="email"
-              autoComplete="username"
-              autoCapitalize="none"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoFocus
-            />
-          </div>
-          <PasswordField id="login-password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" />
-          <button type="submit" className="btn btn--primary" disabled={submitting || !email.trim() || !password}>
-            {submitting ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-
-        <p className="text-sm">
-          New to Shoply? <Link href="/signup">Create your shop</Link>
-        </p>
-      </div>
-    </main>
+      <p className="text-sm">
+        New to Shoply? <Link href="/signup">Create your shop</Link>
+      </p>
+    </AuthLayout>
   );
 }
