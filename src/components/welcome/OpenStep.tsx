@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { activateSeller } from '@/lib/apiClient';
 import { sellerMessage } from '@/lib/errorMessage';
 import { stepForBlocker } from '@/lib/welcome';
-import { CHANNEL_KIND } from '@/lib/labels';
-import { CopyButton } from '@/components/ui/CopyButton';
+import { ShareLinks } from '@/components/ShareLinks';
 import { Alert } from '@/components/ui/Alert';
 import { StepFooter, StepHeading } from './WizardShell';
 import type { ChannelSummary, OnboardingState } from '@/lib/types';
 
 export function OpenStep({
   token,
+  shopName,
   state,
   channels,
   opened,
@@ -22,6 +22,7 @@ export function OpenStep({
   onGoToStep,
 }: {
   token: string;
+  shopName: string;
   state: OnboardingState;
   channels: ChannelSummary[];
   opened: boolean;
@@ -50,7 +51,6 @@ export function OpenStep({
   }
 
   if (opened) {
-    const links = channels.filter((c) => c.buyerLink != null);
     return (
       <div className="stack">
         <div className="stack stack--sm">
@@ -59,20 +59,11 @@ export function OpenStep({
           </span>
           <StepHeading title="Your shop is open">Buyers can message your shop now and your assistant will answer them. Anything it can&apos;t handle shows up under Orders.</StepHeading>
         </div>
-        {links.length > 0 && (
-          <div className="card stack stack--sm">
-            <h2>Share your link</h2>
-            {links.map((channel) => (
-              <div key={channel.routingId} className="split">
-                <span className="truncate">
-                  {CHANNEL_KIND[channel.kind]}: {channel.buyerLink}
-                </span>
-                <CopyButton value={channel.buyerLink!} label="Copy" />
-              </div>
-            ))}
-          </div>
-        )}
-        <Link href="/catalog" className="btn btn--primary">
+        <div className="card stack stack--sm">
+          <h2>Share your link</h2>
+          <ShareLinks shopName={shopName} channels={channels} />
+        </div>
+        <Link href="/home" className="btn btn--primary">
           Go to my shop
         </Link>
       </div>

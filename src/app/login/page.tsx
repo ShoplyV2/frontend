@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (hydrated && token) router.replace('/catalog');
+    if (hydrated && token) router.replace('/home');
   }, [hydrated, token, router]);
 
   async function handleSubmit(event: React.FormEvent) {
@@ -28,7 +28,7 @@ export default function LoginPage() {
     try {
       const { feedToken } = await loginSeller({ email: email.trim(), password });
       setToken(feedToken);
-      router.replace('/catalog');
+      router.replace('/home');
     } catch (err) {
       setError(authMessage(err, 'Could not sign you in.'));
       setSubmitting(false);

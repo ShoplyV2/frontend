@@ -25,7 +25,7 @@ export default function SignupPage() {
   const justSignedUp = useRef(false);
 
   useEffect(() => {
-    if (hydrated && token && !justSignedUp.current) router.replace('/catalog');
+    if (hydrated && token && !justSignedUp.current) router.replace('/home');
   }, [hydrated, token, router]);
 
   const canSubmit = shopName.trim() !== '' && email.trim() !== '' && password.length >= MIN_PASSWORD_LENGTH;

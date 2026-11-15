@@ -1,5 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { ApiError } from '@/lib/apiClient';
 import { RequireLogin } from '@/components/RequireLogin';
 import { AppShell } from '@/components/shell/AppShell';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
@@ -13,8 +16,16 @@ import { useFeedData } from '@/lib/useFeedData';
 import { useFeedToken } from '@/lib/useFeedToken';
 
 export default function FeedPage() {
+  const router = useRouter();
   const { token, hydrated } = useFeedToken();
   const { orders, handoffs, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeedData(token);
+
+  // The orders API only serves an open shop and answers 403 to anyone else. That's a seller who
+  // hasn't finished setup — send them there rather than showing an error.
+  const shopNotOpen = error instanceof ApiError && error.code === 'FORBIDDEN';
+  useEffect(() => {
+    if (shopNotOpen) router.replace('/welcome');
+  }, [shopNotOpen, router]);
 
   if (!hydrated) {
     return (

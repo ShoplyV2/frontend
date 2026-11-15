@@ -6,9 +6,8 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Shoply — your shop',
     short_name: 'Shoply',
     description: 'Your catalog, your orders, and anything your assistant needs you for.',
-    // Not '/' — that's the dev-only seller picker. An installed PWA should
-    // never launch onto it.
-    start_url: '/catalog',
+    // Straight to Home, skipping the '/' redirect hop.
+    start_url: '/home',
     scope: '/',
     display: 'standalone',
     lang: 'en-GH',
@@ -21,6 +20,7 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
     ],
     shortcuts: [
+      { name: 'Home', short_name: 'Home', url: '/home' },
       { name: 'Orders & handoffs', short_name: 'Orders', url: '/feed' },
       { name: 'Catalog', short_name: 'Catalog', url: '/catalog' },
     ],

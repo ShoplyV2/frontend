@@ -5,28 +5,26 @@ import type { ReactNode } from 'react';
 import { AppNav } from './AppNav';
 import { AccountSheet } from './AccountSheet';
 import { OfflineBanner } from './OfflineBanner';
+import { useShopName } from '@/lib/useShopName';
 
 export function AppShell({
   token,
-  shopName,
-  setupBadgeCount = 0,
   pageWidth,
   children,
 }: {
   token: string;
-  shopName?: string;
-  setupBadgeCount?: number;
   pageWidth?: 'narrow' | 'wide';
   children: ReactNode;
 }) {
   const [accountOpen, setAccountOpen] = useState(false);
+  const shopName = useShopName(token);
 
   return (
     <div className="app-shell">
       <a href="#main" className="btn btn--secondary visually-hidden">
         Skip to content
       </a>
-      <AppNav setupBadgeCount={setupBadgeCount} shopName={shopName} onOpenAccount={() => setAccountOpen(true)} />
+      <AppNav shopName={shopName} onOpenAccount={() => setAccountOpen(true)} />
       <div className="stack" style={{ minInlineSize: 0 }}>
         <header className="topbar">
           <span className="split" style={{ inlineSize: '100%' }}>

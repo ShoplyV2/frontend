@@ -3,18 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-type NavKey = 'catalog' | 'feed' | 'onboarding';
+type NavKey = 'home' | 'feed' | 'catalog';
 
 const ICONS: Record<NavKey, string> = {
-  catalog: 'M4 7l8-4 8 4v10a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1V7z',
+  home: 'M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8z',
   feed: 'M5 4h14a1 1 0 0 1 1 1v11l-4-3H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z',
-  onboarding: 'M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z',
+  catalog: 'M6 8h12l1 12H5L6 8zM9 8a3 3 0 0 1 6 0',
 };
 
-const TABS: Array<{ key: NavKey; href: '/catalog' | '/feed' | '/onboarding'; label: string }> = [
-  { key: 'catalog', href: '/catalog', label: 'Catalog' },
+const TABS: Array<{ key: NavKey; href: '/home' | '/feed' | '/catalog'; label: string }> = [
+  { key: 'home', href: '/home', label: 'Home' },
   { key: 'feed', href: '/feed', label: 'Orders' },
-  { key: 'onboarding', href: '/onboarding', label: 'Setup' },
+  { key: 'catalog', href: '/catalog', label: 'Catalog' },
 ];
 
 function Icon({ path }: { path: string }) {
@@ -25,23 +25,17 @@ function Icon({ path }: { path: string }) {
   );
 }
 
-export function AppNav({ setupBadgeCount = 0, shopName, onOpenAccount }: { setupBadgeCount?: number; shopName?: string; onOpenAccount: () => void }) {
+export function AppNav({ shopName, onOpenAccount }: { shopName?: string; onOpenAccount: () => void }) {
   const pathname = usePathname();
 
   return (
     <nav className="appnav" aria-label="Main">
       {TABS.map((tab) => {
         const isActive = pathname === tab.href || pathname?.startsWith(`${tab.href}/`);
-        const badge = tab.key === 'onboarding' && setupBadgeCount > 0 ? setupBadgeCount : null;
         return (
           <Link key={tab.key} href={tab.href} className="appnav-item" aria-current={isActive ? 'page' : undefined}>
             <Icon path={ICONS[tab.key]} />
             <span>{tab.label}</span>
-            {badge !== null && (
-              <span className="appnav-badge" aria-label={`${badge} steps left`}>
-                {badge}
-              </span>
-            )}
           </Link>
         );
       })}

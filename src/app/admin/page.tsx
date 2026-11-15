@@ -54,7 +54,7 @@ export default function AdminPage() {
 
   function openAsSeller(seller: AdminSellerSummary) {
     setSellerToken(seller.feedToken);
-    router.push('/catalog');
+    router.push('/home');
   }
 
   if (!hydrated || !adminToken) {

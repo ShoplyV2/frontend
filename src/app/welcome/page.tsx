@@ -29,7 +29,7 @@ export default function WelcomePage() {
   // refreshes, so finishing the wizard doesn't bounce the seller away from the success screen.
   const alreadyLive = profile?.status === 'LIVE' && !opened;
   useEffect(() => {
-    if (alreadyLive) router.replace('/catalog');
+    if (alreadyLive) router.replace('/home');
   }, [alreadyLive, router]);
 
   if (!hydrated) {
@@ -85,7 +85,7 @@ export default function WelcomePage() {
       )}
       {step === STEP.test && <TestStep token={token} shopName={profile.shopName} channels={channels} onBack={() => goTo(STEP.chat)} onNext={() => goTo(STEP.open)} />}
       {step === STEP.open && (
-        <OpenStep token={token} state={state} channels={channels} opened={opened} refresh={refresh} onOpened={() => setOpened(true)} onBack={() => goTo(STEP.test)} onGoToStep={goTo} />
+        <OpenStep token={token} shopName={profile.shopName} state={state} channels={channels} opened={opened} refresh={refresh} onOpened={() => setOpened(true)} onBack={() => goTo(STEP.test)} onGoToStep={goTo} />
       )}
     </WizardShell>
   );
