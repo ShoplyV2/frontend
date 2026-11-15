@@ -1,14 +1,27 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { Geist, Geist_Mono, Outfit } from 'next/font/google';
 import './globals.css';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { ConfirmProvider } from '@/components/ui/ConfirmProvider';
 
-const inter = Inter({
+// Self-hosted by next/font (no runtime request to Google). Geist is the UI text face, Geist Mono is
+// for links and codes, and Outfit is used only for the "shoply" wordmark.
+const geist = Geist({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-sans',
+});
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-mono',
+});
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['700'],
+  display: 'swap',
+  variable: '--font-wordmark',
 });
 
 export const metadata: Metadata = {
@@ -27,12 +40,12 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
   // Light mode only for now — see tokens.css. Revisit once a real theme toggle exists.
   colorScheme: 'light',
-  themeColor: '#f5f7f8',
+  themeColor: '#f6f6f7',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${outfit.variable}`}>
       <body>
         <ServiceWorkerRegistration />
         <ToastProvider>

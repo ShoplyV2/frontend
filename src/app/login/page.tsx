@@ -7,6 +7,7 @@ import { loginSeller } from '@/lib/apiClient';
 import { authMessage } from '@/lib/errorMessage';
 import { useFeedToken } from '@/lib/useFeedToken';
 import { PasswordField } from '@/components/auth/PasswordField';
+import { Wordmark } from '@/components/ui/Wordmark';
 import { Alert } from '@/components/ui/Alert';
 
 export default function LoginPage() {
@@ -39,6 +40,7 @@ export default function LoginPage() {
     <main className="page page--narrow page--centered">
       <div className="card stack">
         <div className="stack stack--xs">
+          <Wordmark size="md" />
           <h1>Welcome back</h1>
           <p className="text-secondary">Sign in to your shop.</p>
         </div>

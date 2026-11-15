@@ -113,7 +113,7 @@ b {
 }
 code,
 kbd {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.9em;
 }
 

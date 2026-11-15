@@ -223,8 +223,9 @@
   inline-size: 22px;
   block-size: 22px;
 }
+.appnav-brand,
 .appnav-shopname {
-  display: none; /* the mobile top bar carries the shop name; this is the desktop sidebar's */
+  display: none; /* the mobile top bar carries the shop name; these are the desktop sidebar's */
 }
 
 @media (min-width: 900px) {
@@ -256,10 +257,15 @@
     background: var(--color-accent-soft);
     color: var(--color-on-accent-soft);
   }
+  .appnav-brand {
+    display: block;
+    padding: var(--space-1) var(--space-3) var(--space-3);
+  }
   .appnav-shopname {
     display: block;
-    padding: var(--space-2) var(--space-3) var(--space-3);
-    font-weight: var(--weight-medium);
+    padding: 0 var(--space-3) var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
   }
 }
 

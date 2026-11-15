@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Wordmark } from '@/components/ui/Wordmark';
 
 type NavKey = 'home' | 'feed' | 'catalog' | 'shop';
 
@@ -32,6 +33,9 @@ export function AppNav({ shopName }: { shopName?: string }) {
 
   return (
     <nav className="appnav" aria-label="Main">
+      <span className="appnav-brand">
+        <Wordmark size="sm" href="/home" />
+      </span>
       {shopName && <span className="appnav-shopname truncate">{shopName}</span>}
       {TABS.map((tab) => {
         const isActive = pathname === tab.href || pathname?.startsWith(`${tab.href}/`);

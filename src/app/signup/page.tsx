@@ -7,6 +7,7 @@ import { signupSeller } from '@/lib/apiClient';
 import { authMessage } from '@/lib/errorMessage';
 import { useFeedToken } from '@/lib/useFeedToken';
 import { PasswordField } from '@/components/auth/PasswordField';
+import { Wordmark } from '@/components/ui/Wordmark';
 import { Alert } from '@/components/ui/Alert';
 
 const MIN_PASSWORD_LENGTH = 8; // mirrors backend/src/lib/password.ts
@@ -50,6 +51,7 @@ export default function SignupPage() {
     <main className="page page--narrow page--centered">
       <div className="card stack">
         <div className="stack stack--xs">
+          <Wordmark size="md" />
           <h1>Create your shop</h1>
           <p className="text-secondary">It takes a few minutes. You can finish setting up after.</p>
         </div>

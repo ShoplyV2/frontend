@@ -36,15 +36,27 @@
   transform: none;
 }
 
+/* The main action on a screen: ink, not the accent (see tokens.css). */
 .btn--primary {
-  background: var(--color-accent-fill);
-  color: var(--color-on-accent-fill);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-primary-fill);
+  color: var(--color-on-primary-fill);
 }
 .btn--primary:hover:not(:disabled) {
-  background: var(--color-accent-fill-hover);
+  background: var(--color-primary-fill-hover);
 }
 .btn--primary:active:not(:disabled) {
+  background: var(--color-primary-fill-active);
+}
+
+/* For the rare brand moment (e.g. opening the shop). Everything else is primary or secondary. */
+.btn--accent {
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent-fill);
+}
+.btn--accent:hover:not(:disabled) {
+  background: var(--color-accent-fill-hover);
+}
+.btn--accent:active:not(:disabled) {
   background: var(--color-accent-fill-active);
 }
 
@@ -114,7 +126,7 @@
   border: 2px solid currentColor;
   border-block-start-color: transparent;
   border-radius: var(--radius-full);
-  color: var(--color-on-accent-fill);
+  color: var(--color-on-primary-fill);
   animation: spin 0.7s linear infinite;
 }
 .btn--secondary[data-loading='true']::before,
@@ -130,7 +142,7 @@
 /* ---------- card ---------- */
 .card {
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   box-shadow: var(--shadow-sm);
@@ -148,8 +160,8 @@
   border-color: transparent;
 }
 .card--accent {
-  border-color: var(--color-accent-border);
-  box-shadow: var(--shadow-md), inset 3px 0 0 var(--color-accent-fill);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-md);
 }
 
 .card--interactive {
@@ -242,7 +254,6 @@
   align-items: flex-start;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
-  border-inline-start-width: 3px;
   border-radius: var(--radius-md);
   background: var(--color-surface-sunken);
   color: var(--color-text);
@@ -269,25 +280,21 @@
 .alert--danger {
   background: var(--color-danger-soft);
   border-color: var(--color-danger-border);
-  border-inline-start-color: var(--color-danger-fill);
   color: var(--color-on-danger-soft);
 }
 .alert--warning {
   background: var(--color-warning-soft);
   border-color: var(--color-warning-border);
-  border-inline-start-color: var(--color-warning-fill);
   color: var(--color-on-warning-soft);
 }
 .alert--success {
   background: var(--color-success-soft);
   border-color: var(--color-success-border);
-  border-inline-start-color: var(--color-success-fill);
   color: var(--color-on-success-soft);
 }
 .alert--info {
   background: var(--color-accent-soft);
   border-color: var(--color-accent-border);
-  border-inline-start-color: var(--color-accent-fill);
   color: var(--color-on-accent-soft);
 }
 .alert--inline {
@@ -354,7 +361,7 @@
   background-position: right var(--space-3) center;
   background-size: 16px;
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2366757f' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%236b6b74' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
 }
 :root[data-theme='dark'] .select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%238c959d' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
@@ -574,4 +581,104 @@
   text-align: center;
   font-variant-numeric: tabular-nums;
   font-weight: var(--weight-semibold);
+}
+
+/* ---------- filter pill (All / To send / Unpaid …) ----------
+   Used as <button class="pill" aria-pressed="true|false"> for filters. The pressed one is ink. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: 36px;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+.pill:hover {
+  background: var(--color-surface-hover);
+}
+.pill[aria-pressed='true'] {
+  background: var(--color-primary-fill);
+  border-color: var(--color-primary-fill);
+  color: var(--color-on-primary-fill);
+}
+
+/* ---------- switch (availability toggle) ----------
+   <button role="switch" aria-checked="true|false" class="switch">. The ::after keeps a 44px hit area. */
+.switch {
+  position: relative;
+  flex: none;
+  inline-size: 36px;
+  block-size: 20px;
+  min-block-size: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  inset-block: -12px;
+  inset-inline: -4px;
+}
+.switch::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-start: 2px;
+  inline-size: 16px;
+  block-size: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+.switch[aria-checked='true'] {
+  background: var(--color-accent-fill);
+}
+.switch[aria-checked='true']::before {
+  transform: translateX(16px);
+}
+
+/* ---------- wordmark (see components/ui/Wordmark.tsx) ---------- */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-family: var(--font-wordmark), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.wordmark:hover {
+  text-decoration: none;
+}
+.wordmark-dot {
+  inline-size: 0.5em;
+  block-size: 0.5em;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-fill);
+}
+.wordmark--sm {
+  font-size: 1.375rem;
+}
+.wordmark--md {
+  font-size: 1.625rem;
+}
+.wordmark--lg {
+  font-size: 2rem;
 }
