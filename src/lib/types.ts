@@ -41,10 +41,12 @@ export interface FeedOrder {
   status: OrderStatus;
   delivery: {
     name: string;
-    area: string;
-    address: string;
+    // Null when the buyer shared a map pin instead of typing where they are.
+    area: string | null;
+    address: string | null;
     phone: string;
     notes: string | null;
+    location?: { latitude: number; longitude: number; name: string | null; address: string | null } | null;
   };
   payment: {
     channel: string | null;

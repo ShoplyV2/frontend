@@ -33,6 +33,11 @@ function buyerName(o: FeedOrder): string {
   return o.delivery.name || o.buyer.name || 'Buyer';
 }
 
+/** "Efua · Osu": the buyer and where they are. An order placed with a map pin has no typed area, so leave it out rather than print a gap. */
+function buyerWhere(o: FeedOrder): string {
+  return [buyerName(o), o.delivery.area].filter(Boolean).join(' · ');
+}
+
 function OrdersContent() {
   const router = useRouter();
   const params = useSearchParams();
@@ -141,9 +146,7 @@ function OrdersContent() {
                             {o.variant.color}, {o.variant.size} × {o.qty}
                           </span>
                         </span>
-                        <span className="order-buyer truncate">
-                          {buyerName(o)} · {o.delivery.area}
-                        </span>
+                        <span className="order-buyer truncate">{buyerWhere(o)}</span>
                         <span className="order-status">
                           <span className={`badge badge--${ORDER_STATUS[o.status].tone}`}>{ORDER_STATUS[o.status].chip}</span>
                         </span>
@@ -173,7 +176,7 @@ function OrdersContent() {
                       <span className="order-main">
                         <span className="truncate order-name">{o.item.nameSnapshot}</span>
                         <span className="truncate order-sub">
-                          {buyerName(o)} · {o.delivery.area} · {formatMoney(o.total, o.currency)}
+                          {buyerWhere(o)} · {formatMoney(o.total, o.currency)}
                         </span>
                       </span>
                       <span className="queue-row-side">

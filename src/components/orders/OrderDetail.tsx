@@ -89,6 +89,7 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
   }
 
   const photo = order.item.imageUrlSnapshot;
+  const pin = order.delivery.location ?? null;
 
   return (
     <div className="stack stack--panel">
@@ -129,9 +130,9 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
         </div>
         <div className="order-box">
           <p className="label">Deliver to</p>
-          <p className="order-box-main">{order.delivery.area}</p>
-          <a href={mapsHref(order.delivery.area, order.delivery.address)} target="_blank" rel="noreferrer" className="order-box-link">
-            {order.delivery.address} · Open in Maps
+          <p className="order-box-main">{order.delivery.area || pin?.name || (pin ? 'Shared location' : 'Not given')}</p>
+          <a href={mapsHref(order.delivery.area, order.delivery.address, pin)} target="_blank" rel="noreferrer" className="order-box-link">
+            {[order.delivery.address || pin?.address, 'Open in Maps'].filter(Boolean).join(' · ')}
           </a>
         </div>
       </div>

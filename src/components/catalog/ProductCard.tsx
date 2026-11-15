@@ -13,8 +13,8 @@ export function totalStock(item: CatalogItem): number {
 function stockLine(item: CatalogItem): string {
   if (totalStock(item) === 0) return 'All sizes sold out';
   const inStock = item.variants.filter((v) => v.stock > 0);
-  const manyColours = new Set(item.variants.map((v) => v.color.toLowerCase())).size > 1;
-  const labels = inStock.map((v) => `${manyColours ? `${v.color} ` : ''}${v.size}: ${v.stock}`);
+  const manyColours = new Set(item.variants.map((v) => (v.color ?? '').toLowerCase())).size > 1;
+  const labels = inStock.map((v) => `${manyColours && v.color ? `${v.color} ` : ''}${v.size}: ${v.stock}`);
   return labels.length > 3 ? `${labels.slice(0, 3).join(' · ')} · +${labels.length - 3} more` : labels.join(' · ');
 }
 
