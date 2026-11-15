@@ -164,7 +164,7 @@
   --sidebar-w: 240px;
   --page-max: 68rem;
   --page-max-narrow: 30rem;
-  --page-max-wide: 82rem;
+  --page-max-wide: 80rem;
   --tabbar-total: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
 }
 

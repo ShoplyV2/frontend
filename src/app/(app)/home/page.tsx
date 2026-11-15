@@ -7,11 +7,13 @@ import { useFeedData } from '@/lib/useFeedData';
 import { sellerMessage } from '@/lib/errorMessage';
 import { buildQueue, filterQueue, type QueueFilter } from '@/lib/queue';
 import { useMediaQuery } from '@/lib/useMediaQuery';
+import { summarize } from '@/lib/summary';
+import { useNow } from '@/lib/useNow';
 import { Page } from '@/components/shell/Page';
+import { PageHeader } from '@/components/shell/PageHeader';
 import { useShop } from '@/components/shell/ShopProvider';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
-import { ShareLinks } from '@/components/ShareLinks';
 import { QueueList } from '@/components/home/QueueList';
 import { QueueDetail } from '@/components/home/QueueDetail';
 import { StatsStrip } from '@/components/home/StatsStrip';
@@ -31,6 +33,7 @@ export default function HomePage() {
   // else — so don't ask for them until the profile says this one is.
   const isLive = profile?.status === 'LIVE';
   const feed = useFeedData(isLive ? token : null);
+  const now = useNow(60_000);
 
   // A shop that isn't open yet has nothing to run. Home is where setup resumes.
   const needsSetup = profile != null && profile.status !== 'LIVE';
@@ -51,10 +54,21 @@ export default function HomePage() {
     void refreshShop(); // the sidebar's "to send" badge counts orders
   }} /> : null;
 
+  // "Good afternoon", and what is waiting. Until the clock is known (see useNow) it just says Home.
+  const hour = now == null ? null : new Date(now).getHours();
+  const title = hour == null ? 'Home' : hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const toSendCount = now == null ? 0 : summarize(feed.orders, now).toSendCount;
+  const questionCount = feed.handoffs.length;
+  const waiting = [
+    toSendCount > 0 ? `${toSendCount} ${toSendCount === 1 ? 'parcel' : 'parcels'} to send` : null,
+    questionCount > 0 ? `${questionCount} ${questionCount === 1 ? 'question' : 'questions'} for you` : null,
+  ].filter((part): part is string => part != null);
+  const subtitle = !ready ? undefined : waiting.length > 0 ? `${waiting.join(' and ')}.` : "You're all caught up.";
+
   return (
     <Page width="wide">
       <div className="stack">
-        <h1>Home</h1>
+        <PageHeader title={title} subtitle={subtitle} />
 
         {setup.error != null && !profile && (
           <Alert variant="danger" action={<button className="btn btn--secondary btn--sm" onClick={() => setup.refresh()}>Try again</button>}>
@@ -90,14 +104,6 @@ export default function HomePage() {
             )}
 
             <FinishSetup token={token} profile={profile} state={state} channels={channels} refresh={setup.refresh} />
-
-            <section className="section">
-              <p className="section-title">Your shop link</p>
-              <div className="card stack">
-                <p className="text-secondary">Share this anywhere your buyers are: your Instagram bio, WhatsApp status, or a direct message.</p>
-                <ShareLinks shopName={profile.shopName} channels={channels} />
-              </div>
-            </section>
           </>
         )}
       </div>

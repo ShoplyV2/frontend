@@ -47,7 +47,7 @@ export function Sidebar() {
         {(['telegram', 'whatsapp'] as const).map((kind) => {
           const s = chatAppStatus(kind, channels, profile);
           return (
-            <div key={kind} className="status-row">
+            <div key={kind} className={`status-row${s.on ? '' : ' status-row--off'}`}>
               <span className={`status-dot${s.on ? '' : ' status-dot--off'}`} aria-hidden="true" />
               <span>{CHANNEL_KIND[kind]}</span>
               <span className="status-row-note">{s.label}</span>

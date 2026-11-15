@@ -100,6 +100,10 @@ export function GlobalSearch() {
       </button>
 
       <div className="search-box">
+        <svg className="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-3.5-3.5" />
+        </svg>
         <input
           ref={inputRef}
           className="input search-input"
@@ -128,7 +132,7 @@ export function GlobalSearch() {
           onKeyDown={onKeyDown}
         />
         <kbd className="search-kbd" aria-hidden="true">
-          /
+          ⌘K
         </kbd>
 
         {showPopover && (

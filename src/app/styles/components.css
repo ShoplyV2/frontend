@@ -651,15 +651,47 @@
 
 /* Shell controls that must beat .btn's display. They live here, after .btn, because the components
    layer outranks the layout layer. */
-.topbar-add {
+.search-box .search-input {
+  min-block-size: 38px;
+  padding-inline: 36px 52px;
+  border-color: var(--color-border-subtle);
+  background: #fafafa;
+  font-size: var(--input-fs); /* 16px on phones (iOS zoom), 14px below */
+}
+@media (min-width: 900px) {
+  .search-box .search-input {
+    font-size: var(--text-base);
+  }
+}
+.search-box .search-input:focus {
+  border-color: var(--color-accent);
+  background: var(--color-surface);
+}
+.topbar-add,
+.topbar-share {
   display: none;
+}
+.topbar-btn {
+  min-block-size: 38px;
+  padding-inline: 14px;
+  border-radius: var(--radius-md);
+}
+.topbar-btn.btn--secondary {
+  border-color: var(--color-border-subtle);
+}
+.topbar-add-icon {
+  color: var(--color-text);
 }
 .search--expanded .search-toggle {
   display: none;
 }
 @media (min-width: 900px) {
-  .topbar-add {
+  .topbar-add,
+  .topbar-share {
     display: inline-flex;
+  }
+  .topbar-add-icon {
+    display: none;
   }
   .search-toggle {
     display: none;

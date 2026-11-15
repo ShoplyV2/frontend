@@ -11,6 +11,7 @@ import { timeAgo } from '@/lib/time';
 import { useFeedData } from '@/lib/useFeedData';
 import { useNow } from '@/lib/useNow';
 import { Page } from '@/components/shell/Page';
+import { PageHeader } from '@/components/shell/PageHeader';
 import { useShop } from '@/components/shell/ShopProvider';
 import { OrderDetail } from '@/components/orders/OrderDetail';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
@@ -77,7 +78,7 @@ function OrdersContent() {
   return (
     <Page width="wide">
       <div className="stack">
-        <h1>Orders</h1>
+        <PageHeader title="Orders" subtitle="Everything buyers have ordered through your chats." />
 
         {error != null && (
           <Alert variant="danger" action={<button className="btn btn--secondary btn--sm" onClick={() => refresh()}>Try again</button>}>

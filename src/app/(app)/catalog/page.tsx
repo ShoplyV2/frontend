@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import type { CatalogItem } from '@/lib/types';
 import { ProductCard, totalStock } from '@/components/catalog/ProductCard';
 import { Page } from '@/components/shell/Page';
+import { PageHeader } from '@/components/shell/PageHeader';
 import { useShop } from '@/components/shell/ShopProvider';
 import { Alert } from '@/components/ui/Alert';
 
@@ -41,7 +42,17 @@ export default function CatalogPage() {
   return (
     <Page width="wide">
       <div className="stack">
-        <h1>Your catalog</h1>
+        <PageHeader
+          title="Catalog"
+          subtitle={items.length > 0 ? `${items.length} ${items.length === 1 ? 'item' : 'items'}. This is everything your assistant can sell.` : undefined}
+          action={
+            items.length > 0 ? (
+              <Link href="/catalog/new" className="btn btn--primary">
+                + Add item
+              </Link>
+            ) : undefined
+          }
+        />
 
         {error != null && (
           <Alert variant="danger" action={<button className="btn btn--secondary btn--sm" onClick={() => refresh()}>Try again</button>}>
