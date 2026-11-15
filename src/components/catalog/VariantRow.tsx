@@ -32,7 +32,7 @@ export function VariantRow({
   }
 
   return (
-    <div className="split" style={{ paddingBlock: 'var(--space-2)', borderBlockEnd: '1px solid var(--color-border-subtle)', opacity: soldOut ? 0.6 : 1 }}>
+    <div className={`split variant-row${soldOut ? ' variant-row--sold-out' : ''}`}>
       <div className="stack stack--xs">
         <div className="cluster cluster--sm">
           <span className="badge">{variant.color}</span>

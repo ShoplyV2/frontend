@@ -202,7 +202,7 @@ export default function ItemDetailPage() {
         {rowError && <Alert variant="danger">{rowError}</Alert>}
 
         <div className="split">
-          <span className="tabular" style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-semibold)' }}>
+          <span className="tabular item-price">
             {formatMoney(item.basePrice, item.currency)}
           </span>
           <div className="cluster cluster--sm">
@@ -217,11 +217,11 @@ export default function ItemDetailPage() {
           <p className="section-title">Photos</p>
           <div className="cluster">
             {item.images.map((image) => (
-              <div key={image.r2Key} style={{ position: 'relative' }}>
+              <div key={image.r2Key} className="photo-cell">
                 {/* eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URLs, not a local/optimizable asset */}
-                <img src={image.url} alt={item.name} className={`thumb${image.isPrimary ? ' thumb--primary' : ''}`} style={{ inlineSize: '6rem', blockSize: '6rem' }} />
-                {image.isPrimary && <span className="badge badge--accent" style={{ position: 'absolute', insetBlockEnd: 2, insetInlineStart: 2 }}>Main</span>}
-                <div style={{ position: 'absolute', insetBlockStart: 2, insetInlineEnd: 2 }}>
+                <img src={image.url} alt={item.name} className={`thumb thumb--photo${image.isPrimary ? ' thumb--primary' : ''}`} />
+                {image.isPrimary && <span className="badge badge--accent photo-main">Main</span>}
+                <div className="photo-menu">
                   <MenuButton
                     label={`Photo actions`}
                     items={[
@@ -241,7 +241,7 @@ export default function ItemDetailPage() {
 
         <div className="section">
           <p className="section-title">Sizes &amp; stock</p>
-          <div className="stack" style={{ gap: 0 }}>
+          <div className="stack stack--flush">
             {item.variants.map((variant) => (
               <VariantRow
                 key={variant._id}
@@ -289,7 +289,7 @@ function AddVariantForm({ busy, onAdd }: { busy: boolean; onAdd: (input: { color
   }
 
   return (
-    <form className="cluster" onSubmit={handleSubmit} style={{ marginTop: 'var(--space-2)' }}>
+    <form className="cluster cluster--spaced" onSubmit={handleSubmit}>
       <input className="input field--grow" type="text" placeholder="Color" value={color} onChange={(e) => setColor(e.target.value)} />
       <input className="input field--grow" type="text" placeholder="Size" value={size} onChange={(e) => setSize(e.target.value)} />
       <input className="input input--number" type="number" min="0" placeholder="Stock" value={stock} onChange={(e) => setStock(e.target.value)} />
