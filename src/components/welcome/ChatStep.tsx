@@ -22,8 +22,10 @@ export function ChatStep({ token, profile, channels, chatDone, refresh, onBack, 
     <div className="stack">
       <StepHeading title="Connect your chat app">This is where buyers message your shop, and where you get an alert for every order.</StepHeading>
 
-      <TelegramCard token={token} channel={channels.find((c) => c.kind === 'telegram')} refresh={refresh} />
-      <WhatsAppCard token={token} channel={channels.find((c) => c.kind === 'whatsapp')} requestedAt={profile.whatsappRequestedAt} refresh={refresh} />
+      <div className="wizard-cards">
+        <TelegramCard token={token} channel={channels.find((c) => c.kind === 'telegram')} refresh={refresh} />
+        <WhatsAppCard token={token} channel={channels.find((c) => c.kind === 'whatsapp')} requestedAt={profile.whatsappRequestedAt} refresh={refresh} />
+      </div>
 
       <StepFooter onBack={onBack}>
         {!chatDone && whatsappWaiting && (

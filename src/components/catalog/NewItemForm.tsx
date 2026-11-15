@@ -29,11 +29,14 @@ export function NewItemForm({
   onCreated,
   onDirtyChange,
   submitLabel = 'Add item',
+  layout = 'stacked',
 }: {
   token: string;
   onCreated: (result: { name: string; notes: string[] }) => void;
   onDirtyChange?: (dirty: boolean) => void;
   submitLabel?: string;
+  /** 'split' puts the photo beside the fields on wide screens (the setup wizard). */
+  layout?: 'stacked' | 'split';
 }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -170,13 +173,13 @@ export function NewItemForm({
 
 
     <form onSubmit={handleSubmit} className="stack">
-      <div className="form-grid">
+      <div className={`form-grid${layout === 'split' ? ' form-grid--split' : ''}`}>
         <div className="field field--full" ref={photoRef}>
           <span className="field-label">Photo</span>
-          <label className="file-tile" style={{ inlineSize: '10rem', blockSize: '10rem' }}>
+          <label className="file-tile file-tile--photo">
             {previewUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- local object URL preview, not an optimizable asset
-              <img src={previewUrl} alt="" style={{ inlineSize: '100%', blockSize: '100%', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+              <img src={previewUrl} alt="" className="file-tile-img" />
             ) : preparingPhoto ? (
               <span>Preparing…</span>
             ) : (
@@ -189,7 +192,7 @@ export function NewItemForm({
             />
           </label>
           {previewUrl && (
-            <button type="button" className="btn btn--secondary btn--sm" style={{ alignSelf: 'flex-start' }} onClick={() => handleFileChange(null)}>
+            <button type="button" className="btn btn--secondary btn--sm self-start" onClick={() => handleFileChange(null)}>
               Change photo
             </button>
           )}
@@ -239,7 +242,7 @@ export function NewItemForm({
             </div>
           ))}
         </div>
-        <button type="button" className="btn btn--secondary btn--sm" style={{ alignSelf: 'flex-start' }} onClick={addRow}>
+        <button type="button" className="btn btn--secondary btn--sm self-start" onClick={addRow}>
           ＋ Add another
         </button>
       </div>

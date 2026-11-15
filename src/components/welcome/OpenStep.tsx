@@ -53,9 +53,11 @@ export function OpenStep({
   if (opened) {
     return (
       <div className="stack">
-        <div className="stack stack--sm">
-          <span className="badge badge--success self-start">
-            Open for orders
+        <div className="wizard-success">
+          <span className="wizard-success-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12.5l4.5 4.5L19 7.5" />
+            </svg>
           </span>
           <StepHeading title="Your shop is open">Buyers can message your shop now and your assistant will answer them. Anything it can&apos;t handle shows up under Orders.</StepHeading>
         </div>

@@ -35,6 +35,7 @@ export function ItemStep({ token, itemDone, refresh, onNext }: { token: string; 
       <NewItemForm
         token={token}
         submitLabel="Save and continue"
+        layout="split"
         onCreated={async ({ name, notes }) => {
           toast({ tone: 'success', text: notes.length > 0 ? `"${name}" added. ${notes.join(' ')}` : `"${name}" is in your catalog.` });
           await refresh();
