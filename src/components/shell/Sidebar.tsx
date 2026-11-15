@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Wordmark } from '@/components/ui/Wordmark';
 import { CHANNEL_KIND, SELLER_STATUS } from '@/lib/labels';
 import type { ChannelKind, ChannelSummary, SellerProfile } from '@/lib/types';
@@ -19,7 +19,8 @@ function chatAppStatus(kind: ChannelKind, channels: ChannelSummary[], profile: S
 /** The desktop left rail. Phones get the TabBar instead (shown/hidden in layout.css). */
 export function Sidebar() {
   const pathname = usePathname();
-  const { profile, channels, toSendCount } = useShop();
+  const router = useRouter();
+  const { profile, channels, toSendCount, setToken } = useShop();
   const status = profile ? SELLER_STATUS[profile.status] : null;
 
   return (
@@ -64,6 +65,20 @@ export function Sidebar() {
           <p className="truncate sidebar-shop-name">{profile?.shopName ?? 'Your shop'}</p>
           <p className="text-xs text-muted">{status?.label ?? ''}</p>
         </div>
+        <button
+          type="button"
+          className="btn btn--ghost btn--icon sidebar-signout"
+          aria-label="Sign out"
+          title="Sign out"
+          onClick={() => {
+            setToken(null);
+            router.push('/login');
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 4H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h3M16 8l4 4-4 4M20 12H10" />
+          </svg>
+        </button>
       </div>
     </aside>
   );

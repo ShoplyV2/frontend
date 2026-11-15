@@ -680,6 +680,13 @@
 .topbar-add-icon {
   color: var(--color-text);
 }
+.sidebar-signout {
+  flex: none;
+  margin-inline-start: auto;
+  min-block-size: 36px;
+  inline-size: 36px;
+  color: var(--color-text-muted);
+}
 .search--expanded .search-toggle {
   display: none;
 }
