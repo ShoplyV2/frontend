@@ -25,10 +25,11 @@
   --color-surface-hover: #f4f4f5;
   --color-overlay: rgb(24 24 27 / 0.45);
 
-  /* text hierarchy — muted is checked at 4.5:1 on the canvas, not just on white */
+  /* text hierarchy — muted is #71717a to match the design: 4.83:1 on white, ~4.47:1 on the canvas
+     (0.03 under AA), so put muted text on white surfaces where you can */
   --color-text: #18181b;
   --color-text-secondary: #52525b;
-  --color-text-muted: #6b6b74;
+  --color-text-muted: #71717a;
   --color-text-inverse: #ffffff;
 
   /* borders — `border` is what inputs use (visible), `border-subtle` is cards and dividers */
@@ -52,6 +53,15 @@
   --color-accent-soft: #e9eef8;
   --color-on-accent-soft: #254283;
   --color-accent-border: #b5c4e6;
+  /* translucent accent for chips and badges, so it sits on white or on grey */
+  --color-accent-tint: rgb(47 84 168 / 0.12);
+  --color-accent-tint-soft: rgb(47 84 168 / 0.1);
+
+  /* warm placeholders for items with no photo yet */
+  --color-photo-1: #efe7dc;
+  --color-photo-2: #f1e6da;
+  --color-photo-3: #ece9e2;
+  --color-photo-4: #ededef;
 
   /* semantic. Positive states ("paid", "connected", "open") use the accent family with a check
      icon rather than green: the product's look has no green, and an icon carries the meaning. */
@@ -95,29 +105,35 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* type — size / line-height pairs */
+  /* type — size / line-height pairs. Body is 14px (the design's scale); 15px is for inputs
+     on desktop and lead paragraphs, 16px for list-panel headings. */
   --text-2xs: 0.6875rem;
   --leading-2xs: 1rem;
   --text-xs: 0.75rem;
   --leading-xs: 1.125rem;
-  --text-sm: 0.875rem;
-  --leading-sm: 1.3125rem;
-  --text-base: 1rem;
-  --leading-base: 1.5rem;
-  --text-lg: 1.125rem;
-  --leading-lg: 1.625rem;
-  --text-xl: 1.25rem;
-  --leading-xl: 1.75rem;
+  --text-sm: 0.8125rem;
+  --leading-sm: 1.25rem;
+  --text-base: 0.875rem;
+  --leading-base: 1.3125rem;
+  --text-md: 0.9375rem;
+  --leading-md: 1.4375rem;
+  --text-lg: 1rem;
+  --leading-lg: 1.5rem;
+  --text-xl: 1.125rem;
+  --leading-xl: 1.625rem;
   --text-2xl: 1.5rem;
-  --leading-2xl: 1.9375rem;
-  --text-3xl: 1.875rem;
-  --leading-3xl: 2.25rem;
+  --leading-2xl: 1.875rem;
+  --text-3xl: 1.625rem;
+  --leading-3xl: 2rem;
+  --text-4xl: 2rem;
+  --leading-4xl: 2.25rem;
 
   --weight-normal: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
-  --tracking-tight: -0.011em;
+  --tracking-tight: -0.025em;
+  --tracking-tighter: -0.03em;
   --tracking-wide: 0.02em;
 
   --radius-xs: 4px;
@@ -139,12 +155,30 @@
   --z-toast: 400;
 
   --tap-min: 44px;
+  /* control sizes: touch-sized on phones, the design's tighter sizes where there is a mouse */
+  --control-min: var(--tap-min);
+  --btn-h: 2.75rem;
+  --input-h: 3rem;
+  --input-fs: 1rem; /* MUST stay >= 16px below 900px — iOS Safari zooms on focus otherwise */
   --tabbar-h: 56px;
   --sidebar-w: 240px;
   --page-max: 68rem;
   --page-max-narrow: 30rem;
   --page-max-wide: 82rem;
   --tabbar-total: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 900px) {
+  :root {
+    --input-h: 2.875rem;
+    --input-fs: 0.9375rem; /* 15px is safe: iOS zoom only matters on phones */
+  }
+}
+@media (min-width: 900px) and (pointer: fine) {
+  :root {
+    --control-min: 2.5rem;
+    --btn-h: 2.5rem;
+  }
 }
 
 /*
@@ -184,6 +218,12 @@
   --color-accent-soft: #1a2644;
   --color-on-accent-soft: #b8caf5;
   --color-accent-border: #2c3f73;
+  --color-accent-tint: rgb(157 182 239 / 0.16);
+  --color-accent-tint-soft: rgb(157 182 239 / 0.12);
+  --color-photo-1: #2a2620;
+  --color-photo-2: #2c2620;
+  --color-photo-3: #26251f;
+  --color-photo-4: #25252a;
 
   --color-success: #9db6ef;
   --color-success-fill: #4d73cf;

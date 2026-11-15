@@ -87,8 +87,8 @@ h2 {
   line-height: var(--leading-lg);
 }
 h3 {
-  font-size: var(--text-base);
-  line-height: var(--leading-base);
+  font-size: var(--text-md);
+  line-height: var(--leading-md);
   font-weight: var(--weight-semibold);
 }
 
@@ -135,7 +135,7 @@ kbd {
 
 /* Minimum tap target (44px = Apple HIG) on every interactive element. */
 :where(button, [role='button'], a.btn, select, summary, .tabbar-item, .file-tile) {
-  min-block-size: var(--tap-min);
+  min-block-size: var(--control-min);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -5,9 +5,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-block-size: var(--tap-min);
+  min-block-size: var(--btn-h);
   padding-inline: var(--space-4);
-  padding-block: var(--space-2);
+  padding-block: 0;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
   font-size: var(--text-base);
@@ -92,7 +92,7 @@
   padding-inline: var(--space-3);
   font-size: var(--text-sm);
   line-height: var(--leading-sm);
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
 }
 /* Keeps a 44px tap target while looking 36px tall. */
 .btn--sm::after {
@@ -102,9 +102,19 @@
   inset-inline: 0;
 }
 .btn--lg {
-  min-block-size: 52px;
+  min-block-size: 48px;
   padding-inline: var(--space-6);
-  font-size: var(--text-lg);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+/* A button that reads as an accent text link ("Show", "+ Add another"). Keeps the full tap height. */
+.btn--link {
+  padding-inline: 2px;
+  background: transparent;
+  color: var(--color-accent);
+}
+.btn--link:hover:not(:disabled) {
+  text-decoration: underline;
 }
 .btn--block {
   inline-size: 100%;
@@ -145,13 +155,12 @@
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
-  box-shadow: var(--shadow-sm);
   overflow-wrap: anywhere;
   min-inline-size: 0;
 }
 @media (min-width: 900px) {
   .card {
-    padding: var(--space-5);
+    padding: 1.375rem;
   }
 }
 .card--quiet {
@@ -159,44 +168,8 @@
   box-shadow: none;
   border-color: transparent;
 }
-.card--accent {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-md);
-}
 
-.card--interactive {
-  display: block;
-  inline-size: 100%;
-  text-align: start;
-  cursor: pointer;
-  appearance: none;
-  font: inherit;
-  color: inherit;
-  transition:
-    border-color var(--duration-fast) var(--ease-standard),
-    box-shadow var(--duration-fast) var(--ease-standard),
-    transform var(--duration-fast) var(--ease-standard);
-}
-.card--interactive:hover {
-  border-color: var(--color-border-strong);
-  box-shadow: var(--shadow-md);
-}
-.card--interactive:active {
-  transform: scale(0.99);
-}
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: var(--space-3);
-  margin-block-end: var(--space-3);
-}
-.card-title {
-  font-size: var(--text-lg);
-  line-height: var(--leading-lg);
-  font-weight: var(--weight-semibold);
-}
 .card-actions {
   display: flex;
   flex-wrap: wrap;
@@ -211,40 +184,31 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: 2px var(--space-2);
-  border: 1px solid var(--color-border);
+  padding: 3px 10px;
   border-radius: var(--radius-full);
-  background: var(--color-surface-sunken);
+  background: var(--color-surface-hover);
   color: var(--color-text-secondary);
   font-size: var(--text-xs);
   line-height: var(--leading-xs);
   font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-wide);
   white-space: nowrap;
 }
-.badge--success {
-  background: var(--color-success-soft);
-  color: var(--color-on-success-soft);
-  border-color: var(--color-success-border);
-}
+.badge--success,
 .badge--accent {
-  background: var(--color-accent-soft);
+  background: var(--color-accent-tint);
   color: var(--color-on-accent-soft);
-  border-color: var(--color-accent-border);
 }
 .badge--warning {
   background: var(--color-warning-soft);
   color: var(--color-on-warning-soft);
-  border-color: var(--color-warning-border);
 }
 .badge--danger {
   background: var(--color-danger-soft);
   color: var(--color-on-danger-soft);
-  border-color: var(--color-danger-border);
 }
 .badge--muted {
-  background: var(--color-surface-sunken);
-  color: var(--color-text-muted);
+  background: var(--color-surface-hover);
+  color: var(--color-text-secondary);
 }
 
 /* ---------- alert — one treatment replacing three ---------- */
@@ -257,8 +221,8 @@
   border-radius: var(--radius-md);
   background: var(--color-surface-sunken);
   color: var(--color-text);
-  font-size: var(--text-sm);
-  line-height: var(--leading-sm);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
   overflow-wrap: anywhere;
 }
 .alert-body {
@@ -300,14 +264,28 @@
 .alert--inline {
   padding: var(--space-2) var(--space-3);
 }
+/* The quiet banner: no border, an icon, an optional dismiss. */
+.alert--flat {
+  align-items: center;
+  border-color: transparent;
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+}
+.alert-icon {
+  flex: none;
+}
+.alert-dismiss {
+  flex: none;
+  color: inherit;
+}
 
 /* ---------- inputs, select, file tile ---------- */
 .input,
 .textarea,
 .select {
   inline-size: 100%;
-  min-block-size: var(--tap-min);
-  padding: var(--space-2) var(--space-3);
+  min-block-size: var(--input-h);
+  padding: 0 14px;
   background: var(--color-surface);
   color: var(--color-text);
   border: 1px solid var(--color-border);
@@ -315,8 +293,8 @@
   /* MUST stay >= 16px — iOS Safari zooms the viewport on focus below that
      and does not zoom back out. This is the single most common
      "feels broken" bug on iOS web forms. Never add a smaller input size. */
-  font-size: var(--text-base);
-  line-height: var(--leading-base);
+  font-size: var(--input-fs);
+  line-height: var(--leading-md);
   transition: border-color var(--duration-fast) var(--ease-standard);
 }
 .input:hover,
@@ -345,7 +323,8 @@
   border-color: var(--color-danger);
 }
 .textarea {
-  min-block-size: 5rem;
+  min-block-size: 4.5rem;
+  padding-block: 12px;
   resize: vertical;
 }
 .input--number {
@@ -413,19 +392,14 @@
   block-size: 5rem;
   object-fit: cover;
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-photo-1);
 }
 .thumb--primary {
   border: 2px solid var(--color-accent-fill);
 }
 
 /* ---------- table (variants list — kept for the migration window) ---------- */
-.table-scroll {
-  overflow-x: auto;
-  margin-inline: calc(-1 * var(--space-4));
-  padding-inline: var(--space-4);
-}
 .table {
   inline-size: 100%;
   border-collapse: collapse;
@@ -436,11 +410,9 @@
   text-align: start;
   font-weight: var(--weight-semibold);
   font-size: var(--text-xs);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
   color: var(--color-text-muted);
   padding: var(--space-2);
-  border-block-end: 1px solid var(--color-border);
+  border-block-end: 1px solid var(--color-border-subtle);
   white-space: nowrap;
 }
 .table td {
@@ -556,19 +528,6 @@
 }
 
 /* ---------- progress bar ---------- */
-.progress {
-  inline-size: 100%;
-  block-size: 8px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface-sunken);
-  overflow: hidden;
-}
-.progress-bar {
-  block-size: 100%;
-  background: var(--color-accent-fill);
-  border-radius: var(--radius-full);
-  transition: inline-size var(--duration-slow) var(--ease-standard);
-}
 
 /* ---------- stepper (stock +/-) ---------- */
 .stepper {
@@ -584,13 +543,14 @@
 }
 
 /* ---------- filter pill (All / To send / Unpaid …) ----------
-   Used as <button class="pill" aria-pressed="true|false"> for filters. The pressed one is ink. */
+   Used as <button class="pill" aria-pressed="true|false"> for filters. The pressed one is ink.
+   `.pill--sm` is the smaller one that sits inside a card header. */
 .pill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  min-block-size: 36px;
-  padding-inline: var(--space-3);
+  min-block-size: 32px;
+  padding-inline: 14px;
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-full);
   background: var(--color-surface);
@@ -611,6 +571,12 @@
   background: var(--color-primary-fill);
   border-color: var(--color-primary-fill);
   color: var(--color-on-primary-fill);
+}
+.pill--sm {
+  min-block-size: 26px;
+  padding-inline: 10px;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
 }
 
 /* ---------- switch (availability toggle) ----------
@@ -668,13 +634,13 @@
   text-decoration: none;
 }
 .wordmark-dot {
-  inline-size: 0.5em;
-  block-size: 0.5em;
+  inline-size: 0.56em;
+  block-size: 0.56em;
   border-radius: var(--radius-full);
   background: var(--color-accent-fill);
 }
 .wordmark--sm {
-  font-size: 1.375rem;
+  font-size: 1.5rem;
 }
 .wordmark--md {
   font-size: 1.625rem;
@@ -1047,11 +1013,7 @@
   gap: var(--space-2);
 }
 .pill-count {
-  margin-inline-start: 4px;
-  color: var(--color-text-muted);
-}
-.pill[aria-pressed='true'] .pill-count {
-  color: inherit;
+  margin-inline-start: 2px;
 }
 .queue-list {
   margin: 0;
@@ -1077,7 +1039,6 @@
   padding: var(--space-3) var(--space-4);
   background: transparent;
   border: 0;
-  border-inline-start: 3px solid transparent;
   text-align: start;
   cursor: pointer;
   font: inherit;
@@ -1087,8 +1048,7 @@
   background: var(--color-surface-hover);
 }
 .queue-row[aria-current='true'] {
-  background: var(--color-accent-soft);
-  border-inline-start-color: var(--color-accent);
+  background: var(--color-surface-hover);
 }
 .queue-row-main {
   display: flex;
@@ -1174,7 +1134,7 @@
   background: var(--color-surface-hover);
 }
 .table-row[aria-selected='true'] td {
-  background: var(--color-accent-soft);
+  background: var(--color-surface-hover);
 }
 .table-link {
   padding: 0;
@@ -1326,7 +1286,7 @@
 .product-photo {
   position: relative;
   aspect-ratio: 4 / 5;
-  background: var(--color-surface-sunken);
+  background: var(--color-photo-1);
 }
 .product-img {
   inline-size: 100%;
@@ -1404,4 +1364,53 @@
 .card--danger {
   border-color: var(--color-danger-border);
   background: var(--color-danger-soft);
+}
+
+/* ---------- small pieces (formerly inline styles) ---------- */
+.item-price {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+.photo-cell,
+.menu-wrap {
+  position: relative;
+}
+.menu-wrap {
+  display: inline-block;
+}
+.thumb--photo {
+  inline-size: 6rem;
+  block-size: 6rem;
+}
+.photo-main {
+  position: absolute;
+  inset-block-end: 2px;
+  inset-inline-start: 2px;
+}
+.photo-menu {
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-end: 2px;
+}
+.stack--flush {
+  --stack-gap: 0;
+}
+.cluster--spaced {
+  margin-block-start: var(--space-2);
+}
+.menu-item {
+  justify-content: flex-start;
+}
+.menu-item--danger {
+  color: var(--color-danger);
+}
+.alert--flush {
+  border-radius: 0;
+}
+.variant-row {
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--color-border-subtle);
+}
+.variant-row--sold-out {
+  opacity: 0.6;
 }
