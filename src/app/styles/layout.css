@@ -223,25 +223,8 @@
   inline-size: 22px;
   block-size: 22px;
 }
-.appnav-account {
-  display: none;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-}
-.appnav-badge {
-  position: absolute;
-  inset-block-start: 2px;
-  inset-inline-start: calc(50% + 6px);
-  min-inline-size: 16px;
-  block-size: 16px;
-  padding-inline: 3px;
-  border-radius: var(--radius-full);
-  background: var(--color-danger-fill);
-  color: var(--color-on-danger-fill);
-  font-size: 10px;
-  line-height: 16px;
-  text-align: center;
+.appnav-shopname {
+  display: none; /* the mobile top bar carries the shop name; this is the desktop sidebar's */
 }
 
 @media (min-width: 900px) {
@@ -273,15 +256,10 @@
     background: var(--color-accent-soft);
     color: var(--color-on-accent-soft);
   }
-  .appnav-spacer {
-    margin-block-start: auto;
-  }
-  .appnav-badge {
-    position: static;
-    margin-inline-start: auto;
-  }
-  .appnav-account {
-    display: flex;
+  .appnav-shopname {
+    display: block;
+    padding: var(--space-2) var(--space-3) var(--space-3);
+    font-weight: var(--weight-medium);
   }
 }
 

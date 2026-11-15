@@ -4,6 +4,18 @@ import { useEffect, useState } from 'react';
 import { getMe } from './apiClient';
 
 const CACHE_KEY = 'shoply_shop_name';
+const CHANGED_EVENT = 'shoply:shop-name-changed';
+
+/** Call after the name is saved (or on sign-out, with null) so the top bar and sidebar update at once. */
+export function announceShopName(name: string | null): void {
+  try {
+    if (name) sessionStorage.setItem(CACHE_KEY, name);
+    else sessionStorage.removeItem(CACHE_KEY);
+  } catch {
+    // sessionStorage can be unavailable (private mode); the event below still updates open pages.
+  }
+  window.dispatchEvent(new CustomEvent<string | null>(CHANGED_EVENT, { detail: name }));
+}
 
 /**
  * The shop's name for the app shell (top bar and sidebar), so every page can show it without each
@@ -34,6 +46,14 @@ export function useShopName(token: string): string | undefined {
     }
     load();
   }, [token]);
+
+  useEffect(() => {
+    function onChanged(event: Event) {
+      setName((event as CustomEvent<string | null>).detail ?? undefined);
+    }
+    window.addEventListener(CHANGED_EVENT, onChanged);
+    return () => window.removeEventListener(CHANGED_EVENT, onChanged);
+  }, []);
 
   return name;
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { updateProfile } from '@/lib/apiClient';
 import { sellerMessage } from '@/lib/errorMessage';
 import { MIN_SHOP_DESCRIPTION } from '@/lib/checklist';
+import { announceShopName } from '@/lib/useShopName';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Alert } from '@/components/ui/Alert';
 import type { SellerProfile } from '@/lib/types';
@@ -22,6 +23,7 @@ export function ProfileSection({ token, profile, onSaved }: { token: string; pro
     setError(null);
     try {
       await updateProfile(token, { shopName: shopName.trim(), shopDescription: shopDescription.trim() });
+      announceShopName(shopName.trim());
       toast({ tone: 'success', text: 'Shop details saved.' });
       onSaved();
     } catch (err) {

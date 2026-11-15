@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { SESSION_EXPIRED_EVENT } from './apiClient';
+import { announceShopName } from './useShopName';
 
 const STORAGE_KEY = 'shoply_feed_token';
 
@@ -21,6 +22,7 @@ export function useFeedToken() {
   useEffect(() => {
     function onExpired() {
       localStorage.removeItem(STORAGE_KEY);
+      announceShopName(null);
       setTokenState(null);
     }
     window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
@@ -32,6 +34,8 @@ export function useFeedToken() {
       localStorage.setItem(STORAGE_KEY, next);
     } else {
       localStorage.removeItem(STORAGE_KEY);
+      // Another shop may sign in next in this tab; don't flash this one's name at them.
+      announceShopName(null);
     }
     setTokenState(next);
   }, []);

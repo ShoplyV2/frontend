@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { connectTelegramChannel, refreshOwnerBinding, requestWhatsAppConnection } from '@/lib/apiClient';
+import { connectTelegramChannel, disconnectChannel, refreshOwnerBinding, requestWhatsAppConnection } from '@/lib/apiClient';
 import { sellerMessage } from '@/lib/errorMessage';
 import { channelFallbackName } from '@/lib/labels';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useConfirm } from '@/components/ui/ConfirmProvider';
 import { Alert } from '@/components/ui/Alert';
 import type { ChannelSummary } from '@/lib/types';
 
@@ -13,7 +14,7 @@ import type { ChannelSummary } from '@/lib/types';
 
 // --- Telegram ---------------------------------------------------------------
 
-export function TelegramCard({ token, channel, refresh }: { token: string; channel: ChannelSummary | undefined; refresh: () => Promise<void> }) {
+export function TelegramCard({ token, channel, refresh, canDisconnect = false }: { token: string; channel: ChannelSummary | undefined; refresh: () => Promise<void>; canDisconnect?: boolean }) {
   const toast = useToast();
   const [botToken, setBotToken] = useState('');
   const [connecting, setConnecting] = useState(false);
@@ -47,7 +48,7 @@ export function TelegramCard({ token, channel, refresh }: { token: string; chann
         <span className="badge">Do it yourself</span>
       </div>
 
-      {channel && !replacing && <ChannelState token={token} channel={channel} refresh={refresh} onReplace={() => setReplacing(true)} />}
+      {channel && !replacing && <ChannelState token={token} channel={channel} refresh={refresh} onReplace={() => setReplacing(true)} canDisconnect={canDisconnect} />}
 
       {showForm && (
         <>
@@ -100,7 +101,7 @@ export function TelegramCard({ token, channel, refresh }: { token: string; chann
 
 // --- WhatsApp ---------------------------------------------------------------
 
-export function WhatsAppCard({ token, channel, requestedAt, refresh }: { token: string; channel: ChannelSummary | undefined; requestedAt: string | null; refresh: () => Promise<void> }) {
+export function WhatsAppCard({ token, channel, requestedAt, refresh, canDisconnect = false }: { token: string; channel: ChannelSummary | undefined; requestedAt: string | null; refresh: () => Promise<void>; canDisconnect?: boolean }) {
   const toast = useToast();
   const [requesting, setRequesting] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -127,7 +128,7 @@ export function WhatsAppCard({ token, channel, requestedAt, refresh }: { token: 
       </div>
 
       {channel ? (
-        <ChannelState token={token} channel={channel} refresh={refresh} />
+        <ChannelState token={token} channel={channel} refresh={refresh} canDisconnect={canDisconnect} />
       ) : requestedAt ? (
         <Alert variant="info">
           Requested. Our team will connect your WhatsApp number and message you. A link will appear here so alerts reach your phone. You can carry on with Telegram meanwhile.
@@ -147,7 +148,7 @@ export function WhatsAppCard({ token, channel, requestedAt, refresh }: { token: 
 
 // --- A connected channel: bound, waiting for the owner tap, or link expired --------
 
-function ChannelState({ token, channel, refresh, onReplace }: { token: string; channel: ChannelSummary; refresh: () => Promise<void>; onReplace?: () => void }) {
+function ChannelStatus({ token, channel, refresh, onReplace }: { token: string; channel: ChannelSummary; refresh: () => Promise<void>; onReplace?: () => void }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const name = channel.displayName ?? channelFallbackName(channel.kind);
@@ -209,5 +210,63 @@ function ChannelState({ token, channel, refresh, onReplace }: { token: string; c
         {refreshing ? 'Getting link…' : 'Get a new link'}
       </button>
     </div>
+  );
+}
+
+interface ChannelStateProps {
+  token: string;
+  channel: ChannelSummary;
+  refresh: () => Promise<void>;
+  onReplace?: () => void;
+  canDisconnect?: boolean;
+}
+
+// A connected channel: its status, plus (in the Shop area, not the setup wizard) a way to remove it.
+function ChannelState({ canDisconnect = false, ...props }: ChannelStateProps) {
+  if (!canDisconnect) return <ChannelStatus {...props} />;
+  return (
+    <div className="stack stack--sm">
+      <ChannelStatus {...props} />
+      <DisconnectButton token={props.token} channel={props.channel} refresh={props.refresh} />
+    </div>
+  );
+}
+
+function DisconnectButton({ token, channel, refresh }: { token: string; channel: ChannelSummary; refresh: () => Promise<void> }) {
+  const confirm = useConfirm();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+
+  async function handleDisconnect() {
+    const name = channel.displayName ?? channelFallbackName(channel.kind);
+    const ok = await confirm({
+      title: `Disconnect ${name}?`,
+      body:
+        channel.kind === 'whatsapp'
+          ? "Buyers messaging this number will stop getting replies, and you'll stop getting alerts here."
+          : "Buyers messaging this bot will stop getting replies, and you'll stop getting alerts here.",
+      confirmLabel: 'Disconnect',
+      tone: 'danger',
+    });
+    if (!ok) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await disconnectChannel(token, channel.routingId);
+      await refresh();
+    } catch (err) {
+      setError(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      {error != null && <Alert variant="danger">{sellerMessage(error, 'Could not disconnect that.')}</Alert>}
+      <button type="button" className="btn btn--secondary btn--sm self-start" onClick={handleDisconnect} disabled={busy}>
+        {busy ? 'Disconnecting…' : 'Disconnect'}
+      </button>
+    </>
   );
 }
