@@ -89,7 +89,6 @@
   --color-focus: #2f54a8;
   --color-focus-halo: #ffffff;
 
-  --shadow-sm: 0 1px 2px rgb(24 24 27 / 0.05);
   --shadow-md: 0 4px 12px -2px rgb(24 24 27 / 0.08), 0 12px 24px -8px rgb(24 24 27 / 0.14);
 
   /* spacing — 4px base */
@@ -134,7 +133,6 @@
   --weight-bold: 700;
   --tracking-tight: -0.025em;
   --tracking-tighter: -0.03em;
-  --tracking-wide: 0.02em;
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -249,6 +247,5 @@
   --color-focus: #9db6ef;
   --color-focus-halo: #0c0e10;
 
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.04);
   --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.05);
 }
