@@ -23,7 +23,7 @@ export default function HomePage() {
   const isWide = useMediaQuery('(min-width: 900px)');
   const [filter, setFilter] = useState<QueueFilter>('all');
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const { token } = useShop();
+  const { token, refresh: refreshShop } = useShop();
   const setup = useOnboarding(token);
   const { profile, state, channels } = setup;
 
@@ -46,7 +46,10 @@ export default function HomePage() {
   // until the seller taps something, so nothing is selected for them until then.
   const selected = queue.find((q) => q.key === selectedKey && visible.includes(q)) ?? (isWide ? visible[0] : undefined) ?? null;
 
-  const detail = selected && token ? <QueueDetail key={selected.key} item={selected} token={token} onAction={feed.refresh} onPatched={feed.patchOrder} /> : null;
+  const detail = selected && token ? <QueueDetail key={selected.key} item={selected} token={token} onAction={feed.refresh} onPatched={(order) => {
+    feed.patchOrder(order);
+    void refreshShop(); // the sidebar's "to send" badge counts orders
+  }} /> : null;
 
   return (
     <Page width="wide">

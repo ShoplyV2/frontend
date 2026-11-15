@@ -1,7 +1,7 @@
 'use client';
 
 import { HandoffCard } from '@/components/feed/HandoffCard';
-import { OrderCard } from '@/components/feed/OrderCard';
+import { OrderDetail } from '@/components/orders/OrderDetail';
 import type { QueueItem } from '@/lib/queue';
 import type { FeedOrder } from '@/lib/types';
 import { ConversationView } from './ConversationView';
@@ -38,15 +38,5 @@ export function QueueDetail({
     );
   }
 
-  return (
-    <div className="stack">
-      <OrderCard order={item.order} token={token} onPatched={onPatched} />
-      <section className="section">
-        <p className="section-title">Chat with this buyer</p>
-        <div className="card">
-          <ConversationView token={token} conversationId={item.order.conversationId} version={item.order.status} />
-        </div>
-      </section>
-    </div>
-  );
+  return <OrderDetail order={item.order} token={token} onPatched={onPatched} />;
 }

@@ -5,8 +5,9 @@ import type { ReactNode } from 'react';
 
 /** A <dialog>-based sheet: slides up from the bottom on mobile, centred modal at >=900px (see
  * .sheet/.sheet-panel in components.css). Handles open/close sync, Escape-to-cancel, and
- * backdrop-click-to-close. */
-export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: ReactNode }) {
+ * backdrop-click-to-close. With `drawer`, wide screens get a full-height panel on the right
+ * instead of a centred modal. */
+export function Sheet({ open, onClose, title, drawer = false, children }: { open: boolean; onClose: () => void; title?: string; drawer?: boolean; children: ReactNode }) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
   return (
     <dialog
       ref={ref}
-      className="sheet"
+      className={`sheet${drawer ? ' sheet--drawer' : ''}`}
       aria-label={title}
       onCancel={(e) => {
         e.preventDefault();

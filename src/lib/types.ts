@@ -52,6 +52,7 @@ export interface FeedOrder {
     amountPaid: number | null; // minor units
   };
   fulfillmentRisk: 'STOCK_LOST' | null;
+  statusHistory: Array<{ from: OrderStatus | null; to: OrderStatus; at: string; actor: string; reason: string | null }>;
   createdAt: string;
 }
 
