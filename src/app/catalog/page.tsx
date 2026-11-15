@@ -7,13 +7,13 @@ import { useCatalog } from '@/lib/useCatalog';
 import { sellerMessage } from '@/lib/errorMessage';
 import { CATALOG_WARNING } from '@/lib/labels';
 import { ItemTile } from '@/components/catalog/ItemTile';
-import { TokenGate } from '@/components/TokenGate';
+import { RequireLogin } from '@/components/RequireLogin';
 import { AppShell } from '@/components/shell/AppShell';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
 
 export default function CatalogPage() {
-  const { token, setToken, hydrated } = useFeedToken();
+  const { token, hydrated } = useFeedToken();
   const { items, warnings, loading, error, refresh } = useCatalog(token);
   const [warningDismissed, setWarningDismissed] = useState(false);
 
@@ -24,7 +24,7 @@ export default function CatalogPage() {
       </div>
     );
   }
-  if (!token) return <TokenGate onSubmit={setToken} />;
+  if (!token) return <RequireLogin />;
 
   return (
     <AppShell token={token} pageWidth="wide">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { SESSION_EXPIRED_EVENT } from './apiClient';
 
 const STORAGE_KEY = 'shoply_feed_token';
 
@@ -14,6 +15,16 @@ export function useFeedToken() {
       setHydrated(true);
     }
     hydrate();
+  }, []);
+
+  // apiClient announces a 401 on a seller route; clear the token so the page falls back to login.
+  useEffect(() => {
+    function onExpired() {
+      localStorage.removeItem(STORAGE_KEY);
+      setTokenState(null);
+    }
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
   }, []);
 
   const setToken = useCallback((next: string | null) => {

@@ -9,7 +9,7 @@ import { MIN_ITEM_DESCRIPTION } from '@/lib/checklist';
 import { ACCEPT_ATTR, ImageTooLargeError, UnsupportedImageError, prepareUpload } from '@/lib/image';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useConfirm } from '@/components/ui/ConfirmProvider';
-import { TokenGate } from '@/components/TokenGate';
+import { RequireLogin } from '@/components/RequireLogin';
 import { AppShell } from '@/components/shell/AppShell';
 import { Alert } from '@/components/ui/Alert';
 import type { NewVariantInput } from '@/lib/types';
@@ -28,7 +28,7 @@ export default function NewItemPage() {
   const router = useRouter();
   const toast = useToast();
   const confirm = useConfirm();
-  const { token, setToken, hydrated } = useFeedToken();
+  const { token, hydrated } = useFeedToken();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -50,7 +50,7 @@ export default function NewItemPage() {
   const photoRef = useRef<HTMLDivElement>(null);
 
   if (!hydrated) return <div className="page" />;
-  if (!token) return <TokenGate onSubmit={setToken} />;
+  if (!token) return <RequireLogin />;
 
   const dirty = name.trim() !== '' || description.trim() !== '' || basePriceMajor !== '' || file != null || variantRows.some((r) => r.color || r.size || r.stock);
 

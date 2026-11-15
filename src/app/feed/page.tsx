@@ -1,6 +1,6 @@
 'use client';
 
-import { TokenGate } from '@/components/TokenGate';
+import { RequireLogin } from '@/components/RequireLogin';
 import { AppShell } from '@/components/shell/AppShell';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
@@ -13,7 +13,7 @@ import { useFeedData } from '@/lib/useFeedData';
 import { useFeedToken } from '@/lib/useFeedToken';
 
 export default function FeedPage() {
-  const { token, setToken, hydrated } = useFeedToken();
+  const { token, hydrated } = useFeedToken();
   const { orders, handoffs, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeedData(token);
 
   if (!hydrated) {
@@ -25,7 +25,7 @@ export default function FeedPage() {
   }
 
   if (!token) {
-    return <TokenGate onSubmit={setToken} />;
+    return <RequireLogin />;
   }
 
   const sortedOrders = sortByPriority(orders);

@@ -2,6 +2,8 @@ import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummar
 
 export const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
+export const SESSION_EXPIRED_EVENT = 'shoply:session-expired';
+
 export class ApiError extends Error {
   readonly code: string;
   readonly status: number;
@@ -25,8 +27,14 @@ async function request<T>(token: string, path: string, init?: RequestInit): Prom
   });
 
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
-    throw new ApiError(body?.error ?? 'UNKNOWN', body?.message ?? `Request failed (${response.status})`, response.status);
+    // A 401 on a seller route means the session is no longer valid (password changed elsewhere,
+    // account closed). Tell useFeedToken so every page drops back to the login screen instead of
+    // sitting on an error. Admin calls are excluded: they carry a different kind of token and
+    // handle their own 401 (see app/admin/page.tsx). Wrong-password errors are 400s, not 401s.
+    if (response.status === 401 && !path.startsWith('/admin') && typeof window !== 'undefined') {
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+    }
+    throw await parseError(response);
   }
 
   return response.json() as Promise<T>;
@@ -82,25 +90,34 @@ export function deliverOrder(token: string, orderId: string): Promise<{ order: F
   return request(token, `/feed/orders/${orderId}/deliver`, { method: 'POST' });
 }
 
-// --- Onboarding ---------------------------------------------------------
-// signupSeller is the one call a seller makes with no feedToken yet — it hands one out.
+// --- Accounts ------------------------------------------------------------
+// signup and login are the only calls a seller makes with no session yet; both hand back the
+// feedToken that is the session from then on.
 
-export async function signupSeller(
-  shopName: string,
-): Promise<{ feedToken: string; seller: { id: string; shopName: string; status: SellerStatus } }> {
-  const response = await fetch(`${DEFAULT_BASE_URL}/onboarding/signup`, {
+export interface AuthResult {
+  feedToken: string;
+  seller: { id: string; shopName: string; status: SellerStatus };
+}
+
+async function postJson<T>(path: string, body: unknown): Promise<T> {
+  const response = await fetch(`${DEFAULT_BASE_URL}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ shopName }),
+    body: JSON.stringify(body),
   });
-
-  if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
-    throw new ApiError(body?.error ?? 'UNKNOWN', body?.message ?? `Request failed (${response.status})`, response.status);
-  }
-
+  if (!response.ok) throw await parseError(response);
   return response.json();
 }
+
+export function signupSeller(input: { email: string; password: string; shopName: string }): Promise<AuthResult> {
+  return postJson('/auth/signup', input);
+}
+
+export function loginSeller(input: { email: string; password: string }): Promise<AuthResult> {
+  return postJson('/auth/login', input);
+}
+
+// --- Onboarding ---------------------------------------------------------
 
 // --- Admin (the Shoply team's side — separate account type, see backend/src/routes/admin.route.ts) ---
 
@@ -137,9 +154,18 @@ export function getMe(token: string): Promise<SellerProfile> {
 
 export function updateProfile(
   token: string,
-  patch: { shopName?: string; shopDescription?: string },
-): Promise<{ id: string; shopName: string; shopDescription: string }> {
+  patch: { shopName?: string; shopDescription?: string; email?: string },
+): Promise<{ id: string; shopName: string; email: string | null; shopDescription: string }> {
   return request(token, '/me', { method: 'PATCH', body: JSON.stringify(patch) });
+}
+
+// Both return a session token to keep using: changing the password signs every other device out.
+export function changePassword(token: string, input: { currentPassword: string; newPassword: string }): Promise<{ feedToken: string }> {
+  return request(token, '/me/password', { method: 'POST', body: JSON.stringify(input) });
+}
+
+export function deleteAccount(token: string, password: string): Promise<{ deleted: boolean }> {
+  return request(token, '/me', { method: 'DELETE', body: JSON.stringify({ password }) });
 }
 
 export function listChannels(token: string): Promise<{ channels: ChannelSummary[] }> {

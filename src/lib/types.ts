@@ -64,11 +64,12 @@ export interface FeedHandoff {
   timeoutAt: string | null;
 }
 
-export type SellerStatus = 'ONBOARDING' | 'LIVE' | 'SUSPENDED';
+export type SellerStatus = 'ONBOARDING' | 'LIVE' | 'SUSPENDED' | 'DELETED';
 
 export interface SellerProfile {
   id: string;
   shopName: string;
+  email: string | null;
   shopDescription: string;
   status: SellerStatus;
   active: boolean;

@@ -2,26 +2,22 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { TokenGate } from '@/components/TokenGate';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { useFeedToken } from '@/lib/useFeedToken';
 
-// The front door. Signed-in sellers go straight into the app; everyone else sees sign-in. This is
-// the seller side only — the team's tooling lives under /admin and is not linked from here.
+// The front door. Signed-in sellers go straight into the app, everyone else to login. The team's
+// tooling lives under /admin and is not linked from anywhere a seller can see.
 export default function HomeRedirect() {
   const router = useRouter();
-  const { token, setToken, hydrated } = useFeedToken();
+  const { token, hydrated } = useFeedToken();
 
   useEffect(() => {
-    if (hydrated && token) router.replace('/catalog');
+    if (hydrated) router.replace(token ? '/catalog' : '/login');
   }, [hydrated, token, router]);
 
-  if (!hydrated || token) {
-    return (
-      <div className="page">
-        <PageSkeleton />
-      </div>
-    );
-  }
-  return <TokenGate onSubmit={setToken} />;
+  return (
+    <div className="page">
+      <PageSkeleton />
+    </div>
+  );
 }

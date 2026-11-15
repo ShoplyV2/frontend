@@ -18,7 +18,7 @@ import {
   setVariantStock,
   updateCatalogItem,
 } from '@/lib/apiClient';
-import { TokenGate } from '@/components/TokenGate';
+import { RequireLogin } from '@/components/RequireLogin';
 import { AppShell } from '@/components/shell/AppShell';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
@@ -35,7 +35,7 @@ export default function ItemDetailPage() {
   const router = useRouter();
   const confirm = useConfirm();
   const toast = useToast();
-  const { token, setToken, hydrated } = useFeedToken();
+  const { token, hydrated } = useFeedToken();
   const { items, loading, error, refresh, replaceItem, patchItem } = useCatalog(token);
   const [pending, setPending] = useState<Set<string>>(new Set());
   const [rowError, setRowError] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function ItemDetailPage() {
       </div>
     );
   }
-  if (!token) return <TokenGate onSubmit={setToken} />;
+  if (!token) return <RequireLogin />;
 
   const item = items.find((i) => i.id === params.id);
 

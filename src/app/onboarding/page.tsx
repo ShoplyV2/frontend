@@ -11,13 +11,13 @@ import { ChannelSection } from '@/components/onboarding/ChannelSection';
 import { PayoutSection } from '@/components/onboarding/PayoutSection';
 import { ActivationChecklist } from '@/components/onboarding/ActivationChecklist';
 import { LiveCelebration } from '@/components/onboarding/LiveCelebration';
-import { TokenGate } from '@/components/TokenGate';
+import { RequireLogin } from '@/components/RequireLogin';
 import { AppShell } from '@/components/shell/AppShell';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
 
 export default function OnboardingPage() {
-  const { token, setToken, hydrated } = useFeedToken();
+  const { token, hydrated } = useFeedToken();
   const { profile, state, channels, loading, error, refresh } = useOnboarding(token);
   const [activating, setActivating] = useState(false);
   const [activateError, setActivateError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export default function OnboardingPage() {
       </div>
     );
   }
-  if (!token) return <TokenGate onSubmit={setToken} />;
+  if (!token) return <RequireLogin />;
 
   async function handleActivate() {
     if (!token) return;

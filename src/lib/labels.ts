@@ -19,6 +19,7 @@ export const SELLER_STATUS: Record<SellerStatus, { label: string; tone: Tone }> 
   ONBOARDING: { label: 'Setting up', tone: 'warning' },
   LIVE: { label: 'Open for orders', tone: 'success' },
   SUSPENDED: { label: 'Paused', tone: 'danger' },
+  DELETED: { label: 'Closed', tone: 'muted' },
 };
 
 export const CHANNEL_KIND: Record<ChannelKind, string> = {
