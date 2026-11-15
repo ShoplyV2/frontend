@@ -19,7 +19,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Saving the token flips `token` before our own redirect to /onboarding lands, and the effect
+  // Saving the token flips `token` before our own redirect to /welcome lands, and the effect
   // below would win that race and send a brand-new seller to /catalog. It's only for visitors who
   // arrive here already signed in.
   const justSignedUp = useRef(false);
@@ -39,7 +39,7 @@ export default function SignupPage() {
       const { feedToken } = await signupSeller({ email: email.trim(), password, shopName: shopName.trim() });
       justSignedUp.current = true;
       setToken(feedToken);
-      router.replace('/onboarding');
+      router.replace('/welcome');
     } catch (err) {
       setError(authMessage(err, 'Could not create your shop.'));
       setSubmitting(false);

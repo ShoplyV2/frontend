@@ -10,6 +10,8 @@ import { useFeedToken } from '@/lib/useFeedToken';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { Alert } from '@/components/ui/Alert';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
+import { WhatsAppConnectForm } from '@/components/admin/WhatsAppConnectForm';
+import { CHANNEL_KIND } from '@/lib/labels';
 import type { AdminSellerSummary } from '@/lib/types';
 
 export default function AdminPage() {
@@ -105,6 +107,17 @@ export default function AdminPage() {
                   <strong>{seller.shopName}</strong>
                   <span className={`badge badge--${statusInfo.tone}`}>{statusInfo.label}</span>
                 </div>
+                {seller.email && <span className="text-sm text-secondary truncate">{seller.email}</span>}
+                <div className="cluster cluster--sm">
+                  {seller.channels.map((channel) => (
+                    <span key={channel.kind} className={`badge ${channel.active && channel.bound ? 'badge--success' : 'badge--warning'}`}>
+                      {CHANNEL_KIND[channel.kind]}
+                      {channel.active && channel.bound ? '' : ' (not receiving alerts)'}
+                    </span>
+                  ))}
+                  {seller.channels.length === 0 && <span className="badge badge--muted">No chat app</span>}
+                  {seller.whatsappRequestedAt && <span className="badge badge--accent">WhatsApp requested {new Date(seller.whatsappRequestedAt).toLocaleDateString()}</span>}
+                </div>
                 <div className="split">
                   <code className="text-sm text-muted">••••{seller.feedToken.slice(-4)}</code>
                   <CopyButton value={seller.feedToken} label="Copy key" className="btn btn--ghost btn--sm" />
@@ -112,6 +125,15 @@ export default function AdminPage() {
                 <button type="button" className="btn btn--primary" onClick={() => openAsSeller(seller)}>
                   Open as this shop
                 </button>
+                {/* Always shown: right after connecting, the refresh clears the request and adds the channel,
+                    and the form is also where the seller's link appears — it must not vanish with them.
+                    Re-posting is safe (refreshes the token and issues a new link), hence "Reconnect". */}
+                <details>
+                  <summary className="text-sm">
+                    {seller.channels.some((c) => c.kind === 'whatsapp') ? 'Reconnect WhatsApp' : seller.whatsappRequestedAt ? 'Connect their WhatsApp' : 'Connect WhatsApp'}
+                  </summary>
+                  <WhatsAppConnectForm adminToken={adminToken} sellerId={seller.id} onConnected={refresh} />
+                </details>
               </div>
             );
           })}

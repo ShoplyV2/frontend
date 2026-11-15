@@ -136,6 +136,16 @@ export async function adminLogin(email: string, password: string): Promise<{ ses
   return response.json();
 }
 
+// The team connects a seller's WhatsApp number on their behalf; the result carries the link the
+// seller opens on their own phone to start receiving alerts there.
+export function connectSellerWhatsApp(
+  adminToken: string,
+  sellerId: string,
+  input: { phoneNumberId: string; wabaId: string; accessToken: string },
+): Promise<{ routingId: string; displayName: string | null; ownerBindingUrl: string | null }> {
+  return request(adminToken, `/admin/sellers/${encodeURIComponent(sellerId)}/channels/whatsapp`, { method: 'POST', body: JSON.stringify(input) });
+}
+
 export function listAdminSellers(adminToken: string): Promise<{ sellers: AdminSellerSummary[] }> {
   return request(adminToken, '/admin/sellers');
 }
@@ -174,6 +184,16 @@ export function listChannels(token: string): Promise<{ channels: ChannelSummary[
 
 export function connectTelegramChannel(token: string, botToken: string): Promise<{ channel: ChannelSummary }> {
   return request(token, '/me/channels/telegram', { method: 'POST', body: JSON.stringify({ botToken }) });
+}
+
+// Asks the Shoply team to connect the seller's WhatsApp number (team-assisted for now).
+export function requestWhatsAppConnection(token: string): Promise<{ whatsappRequestedAt: string }> {
+  return request(token, '/me/channels/whatsapp/request', { method: 'POST' });
+}
+
+// Sends a message to the seller's own chat on that channel, so they can see alerts will reach them.
+export function sendTestAlert(token: string, routingId: string): Promise<{ sent: boolean }> {
+  return request(token, `/me/channels/${encodeURIComponent(routingId)}/test`, { method: 'POST' });
 }
 
 export function refreshOwnerBinding(token: string, routingId: string): Promise<{ channel: ChannelSummary }> {

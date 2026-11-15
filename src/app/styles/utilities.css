@@ -53,3 +53,7 @@
   flex-direction: column;
   gap: 2px;
 }
+
+.self-start {
+  align-self: flex-start;
+}

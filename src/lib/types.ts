@@ -71,6 +71,7 @@ export interface SellerProfile {
   shopName: string;
   email: string | null;
   shopDescription: string;
+  whatsappRequestedAt: string | null;
   status: SellerStatus;
   active: boolean;
   persona: {
@@ -104,6 +105,8 @@ export interface ChannelSummary {
   // opens the bot and sends /start. WhatsApp: a wa.me link that prefills `owner_<nonce>`. Either
   // way the seller's own message is what sets sellerContactId server-side.
   ownerBindingUrl: string | null;
+  // Where a BUYER starts a chat with this shop — the link the seller shares. Null if unavailable.
+  buyerLink: string | null;
 }
 
 export interface Bank {
@@ -115,9 +118,13 @@ export interface Bank {
 export interface AdminSellerSummary {
   id: string;
   shopName: string;
+  email: string | null;
   status: SellerStatus;
   active: boolean;
   feedToken: string;
+  // Set while the seller is waiting for the team to connect their WhatsApp number.
+  whatsappRequestedAt: string | null;
+  channels: Array<{ kind: ChannelKind; displayName: string | null; active: boolean; bound: boolean }>;
 }
 
 export interface CatalogImage {
