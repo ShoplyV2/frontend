@@ -6,9 +6,10 @@ import { sellerMessage } from '@/lib/errorMessage';
 import { MIN_SHOP_DESCRIPTION } from '@/lib/checklist';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Alert } from '@/components/ui/Alert';
+import { SELLER_STATUS } from '@/lib/labels';
 import type { SellerProfile } from '@/lib/types';
 
-export function ProfileSection({ token, profile, onSaved }: { token: string; profile: SellerProfile; onSaved: () => void }) {
+export function ProfileSection({ token, profile, onSaved, showStatus = false }: { token: string; profile: SellerProfile; onSaved: () => void; showStatus?: boolean }) {
   const toast = useToast();
   const [shopName, setShopName] = useState(profile.shopName);
   const [shopDescription, setShopDescription] = useState(profile.shopDescription);
@@ -33,7 +34,10 @@ export function ProfileSection({ token, profile, onSaved }: { token: string; pro
 
   return (
     <div id="profile" className="card stack">
-      <h2>Your shop details</h2>
+      <div className="split">
+        <h2>Shop details</h2>
+        {showStatus && <span className={`badge badge--${SELLER_STATUS[profile.status].tone}`}>{SELLER_STATUS[profile.status].label}</span>}
+      </div>
       {error != null && <Alert variant="danger">{sellerMessage(error, 'Could not save your shop details.')}</Alert>}
       <div className="field">
         <label className="field-label" htmlFor="shop-name">

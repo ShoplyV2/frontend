@@ -10,8 +10,9 @@ export function telHref(phone: string): string {
 
 // A link the seller taps — never a prefetched embed or auto-loaded map tile. The buyer's address
 // shouldn't leave the device unless the seller acts.
-export function mapsHref(area: string, address: string): string {
-  const query = encodeURIComponent(`${address}, ${area}, Accra, Ghana`);
+export function mapsHref(area: string | null, address: string | null, location?: { latitude: number; longitude: number } | null): string {
+  // A shared pin is exact; typed words are a search.
+  const query = location ? `${location.latitude},${location.longitude}` : encodeURIComponent([address, area, 'Accra, Ghana'].filter(Boolean).join(', '));
   return `https://www.google.com/maps/search/?api=1&query=${query}`;
 }
 

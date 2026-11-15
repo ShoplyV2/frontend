@@ -14,6 +14,7 @@ export type HandoffStatus = 'PENDING' | 'ANSWERED' | 'TIMED_OUT' | 'ESCALATED' |
 
 export interface FeedOrder {
   _id: string;
+  conversationId: string;
   buyer: {
     waId: string;
     phone: string;
@@ -40,21 +41,26 @@ export interface FeedOrder {
   status: OrderStatus;
   delivery: {
     name: string;
-    area: string;
-    address: string;
+    // Null when the buyer shared a map pin instead of typing where they are.
+    area: string | null;
+    address: string | null;
     phone: string;
     notes: string | null;
+    location?: { latitude: number; longitude: number; name: string | null; address: string | null } | null;
   };
   payment: {
     channel: string | null;
     paidAt: string | null;
+    amountPaid: number | null; // minor units
   };
   fulfillmentRisk: 'STOCK_LOST' | null;
+  statusHistory: Array<{ from: OrderStatus | null; to: OrderStatus; at: string; actor: string; reason: string | null }>;
   createdAt: string;
 }
 
 export interface FeedHandoff {
   _id: string;
+  conversationId: string;
   reason: HandoffReason;
   buyerQuestion: string;
   suggestedReply: string | null;
@@ -64,12 +70,14 @@ export interface FeedHandoff {
   timeoutAt: string | null;
 }
 
-export type SellerStatus = 'ONBOARDING' | 'LIVE' | 'SUSPENDED';
+export type SellerStatus = 'ONBOARDING' | 'LIVE' | 'SUSPENDED' | 'DELETED';
 
 export interface SellerProfile {
   id: string;
   shopName: string;
+  email: string | null;
   shopDescription: string;
+  whatsappRequestedAt: string | null;
   status: SellerStatus;
   active: boolean;
   persona: {
@@ -99,10 +107,12 @@ export interface ChannelSummary {
   displayName: string | null;
   sellerContactId: string | null;
   active: boolean;
-  // Non-null only for an unbound Telegram channel with a live binding window — a bot can never
-  // message its owner first, so this is how the seller finishes connecting: tapping it opens the
-  // bot and sends /start, which is what sets sellerContactId server-side.
+  // Non-null only for an unbound channel with a live binding window. Telegram: a t.me link that
+  // opens the bot and sends /start. WhatsApp: a wa.me link that prefills `owner_<nonce>`. Either
+  // way the seller's own message is what sets sellerContactId server-side.
   ownerBindingUrl: string | null;
+  // Where a BUYER starts a chat with this shop — the link the seller shares. Null if unavailable.
+  buyerLink: string | null;
 }
 
 export interface Bank {
@@ -110,13 +120,17 @@ export interface Bank {
   code: string;
 }
 
-// Dev-only, unauthenticated seller picker (no multi-tenant auth yet) — see backend/src/routes/admin.route.ts.
+// One row of the admin seller list — see backend/src/routes/admin.route.ts.
 export interface AdminSellerSummary {
   id: string;
   shopName: string;
+  email: string | null;
   status: SellerStatus;
   active: boolean;
   feedToken: string;
+  // Set while the seller is waiting for the team to connect their WhatsApp number.
+  whatsappRequestedAt: string | null;
+  channels: Array<{ kind: ChannelKind; displayName: string | null; active: boolean; bound: boolean }>;
 }
 
 export interface CatalogImage {
@@ -155,4 +169,13 @@ export interface NewVariantInput {
   stock: number;
   priceMajor?: number | null;
   sku?: string | null;
+}
+
+/** One line of a buyer–shop chat, as GET /feed/conversations/:id/messages returns it. */
+export interface TranscriptMessage {
+  role: 'buyer' | 'assistant';
+  text: string;
+  at: string;
+  /** The buyer attached a photo (shown as a placeholder, the image itself isn't served). */
+  hasMedia: boolean;
 }

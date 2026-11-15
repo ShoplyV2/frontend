@@ -14,6 +14,16 @@ export function timeAgo(iso: string, now: number = Date.now()): string {
   return `${dayLabel(iso)}, ${clockTime(iso)}`;
 }
 
+/** The compact form for dense lists: "now", "14m", "3h", "2d". */
+export function timeAgoShort(iso: string, now: number = Date.now()): string {
+  const minutes = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60_000));
+  if (minutes < 1) return 'now';
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.round(hours / 24)}d`;
+}
+
 export function timeLeft(iso: string, now: number = Date.now()): { text: string; urgent: boolean; expired: boolean } {
   const then = new Date(iso).getTime();
   const seconds = Math.round((then - now) / 1000);

@@ -31,7 +31,7 @@ export function MenuButton({ items, label = 'More actions', icon }: { items: Men
   }, [open]);
 
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+    <div ref={ref} className="menu-wrap">
       <button type="button" className="btn btn--ghost btn--icon btn--sm" aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         {icon ?? (
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
@@ -48,9 +48,8 @@ export function MenuButton({ items, label = 'More actions', icon }: { items: Men
               key={item.label}
               type="button"
               role="menuitem"
-              className="btn btn--ghost btn--sm"
+              className={`btn btn--ghost btn--sm menu-item${item.danger ? ' menu-item--danger' : ''}`}
               disabled={item.disabled}
-              style={{ justifyContent: 'flex-start', color: item.danger ? 'var(--color-danger)' : undefined }}
               onClick={() => {
                 setOpen(false);
                 item.onSelect();

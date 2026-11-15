@@ -20,7 +20,7 @@ export function sellerMessage(err: unknown, fallback: string): string {
   switch (err.code) {
     case 'UNAUTHORIZED':
     case 'FORBIDDEN':
-      return 'Your sign-in has expired. Enter your shop key again.';
+      return 'Your sign-in has expired. Please sign in again.';
     case 'NOT_FOUND':
       return "That's not there any more. Pull down to refresh.";
     case 'UPSTREAM_ERROR':
@@ -51,4 +51,14 @@ function isSellerSafe(message: string): boolean {
   if (message.length === 0 || message.length > 160) return false;
   if (!/^[A-Z]/.test(message)) return false;
   return !UNSAFE_PATTERNS.some((pattern) => pattern.test(message));
+}
+
+/**
+ * For the login and signup screens only. There an UNAUTHORIZED/FORBIDDEN response isn't an expired
+ * session, it's the backend saying "Wrong email or password." / "This shop is paused" — copy that
+ * is written for sellers and safe to show as-is.
+ */
+export function authMessage(err: unknown, fallback: string): string {
+  if (err instanceof ApiError && (err.code === 'UNAUTHORIZED' || err.code === 'FORBIDDEN')) return err.message;
+  return sellerMessage(err, fallback);
 }
