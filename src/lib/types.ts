@@ -110,7 +110,7 @@ export interface Bank {
   code: string;
 }
 
-// Dev-only, unauthenticated seller picker (no multi-tenant auth yet) — see backend/src/routes/admin.route.ts.
+// One row of the admin seller list — see backend/src/routes/admin.route.ts.
 export interface AdminSellerSummary {
   id: string;
   shopName: string;

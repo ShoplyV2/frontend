@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Sheet } from '@/components/ui/Sheet';
 import { CopyButton } from '@/components/ui/CopyButton';
@@ -55,12 +54,6 @@ export function AccountSheet({ open, onClose, shopName, token }: { open: boolean
           </div>
         )}
       </div>
-
-      {process.env.NODE_ENV !== 'production' && (
-        <Link href="/" className="btn btn--secondary btn--block">
-          All shops (dev)
-        </Link>
-      )}
 
       <button type="button" className="btn btn--danger btn--block" onClick={handleSignOut}>
         Sign out

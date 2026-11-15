@@ -102,15 +102,25 @@ export async function signupSeller(
   return response.json();
 }
 
-// --- Admin (dev-only, no auth — see backend/src/routes/admin.route.ts) -------
+// --- Admin (the Shoply team's side — separate account type, see backend/src/routes/admin.route.ts) ---
 
-export async function listAdminSellers(): Promise<{ sellers: AdminSellerSummary[] }> {
-  const response = await fetch(`${DEFAULT_BASE_URL}/admin/sellers`);
-  if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
-    throw new ApiError(body?.error ?? 'UNKNOWN', body?.message ?? `Request failed (${response.status})`, response.status);
-  }
+async function parseError(response: Response): Promise<ApiError> {
+  const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+  return new ApiError(body?.error ?? 'UNKNOWN', body?.message ?? `Request failed (${response.status})`, response.status);
+}
+
+export async function adminLogin(email: string, password: string): Promise<{ sessionToken: string; email: string }> {
+  const response = await fetch(`${DEFAULT_BASE_URL}/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) throw await parseError(response);
   return response.json();
+}
+
+export function listAdminSellers(adminToken: string): Promise<{ sellers: AdminSellerSummary[] }> {
+  return request(adminToken, '/admin/sellers');
 }
 
 export function getOnboardingState(token: string): Promise<OnboardingState> {
