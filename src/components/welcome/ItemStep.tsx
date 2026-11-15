@@ -12,16 +12,16 @@ export function ItemStep({ token, itemDone, refresh, onNext }: { token: string; 
 
   if (itemDone && !addingAnother) {
     return (
-      <div className="stack">
+      <div className="step step--card">
         <StepHeading title="Your first item is in" />
         <div className="alert alert--success">
           <div className="alert-body">Your assistant can already sell it. You can add the rest of your catalog any time.</div>
         </div>
         <StepFooter>
-          <button type="button" className="btn btn--secondary" onClick={() => setAddingAnother(true)}>
+          <button type="button" className="btn btn--secondary btn--lg" onClick={() => setAddingAnother(true)}>
             Add another item
           </button>
-          <button type="button" className="btn btn--primary" onClick={onNext}>
+          <button type="button" className="btn btn--primary btn--lg" onClick={onNext}>
             Continue
           </button>
         </StepFooter>
@@ -30,7 +30,7 @@ export function ItemStep({ token, itemDone, refresh, onNext }: { token: string; 
   }
 
   return (
-    <div className="stack">
+    <div className="step step--card">
       <StepHeading title="Add your first item">Start with a photo. Your assistant sells what&apos;s in your catalog, and matches buyers&apos; screenshots to your photos.</StepHeading>
       <NewItemForm
         token={token}

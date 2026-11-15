@@ -55,7 +55,7 @@ export function PayoutSection({ token, payoutConfigured, onChanged }: { token: s
 
   return (
     <div id="payout" className="card stack">
-      <h2>Get paid to your bank</h2>
+      <h2>Payments</h2>
       <p className="text-secondary">Buyer payments only reach your bank once this is set.</p>
 
       {(payoutConfigured || saved) && (

@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { answerHandoff, takeoverHandoff } from '@/lib/apiClient';
 import { sellerMessage } from '@/lib/errorMessage';
 import { HANDOFF_REASON } from '@/lib/labels';
-import { timeAgo, timeLeft } from '@/lib/time';
+import { timeLeft } from '@/lib/time';
 import { useNow } from '@/lib/useNow';
 import { useConfirm } from '@/components/ui/ConfirmProvider';
 import { Alert } from '@/components/ui/Alert';
+import { ConversationView } from '@/components/home/ConversationView';
 import type { FeedHandoff } from '@/lib/types';
 
 export function HandoffCard({ handoff, token, onAction }: { handoff: FeedHandoff; token: string; onAction: () => void }) {
@@ -58,29 +59,25 @@ export function HandoffCard({ handoff, token, onAction }: { handoff: FeedHandoff
 
   if (sent) {
     return (
-      <div className="card">
+      <div className="card stack stack--panel">
         <Alert variant="success">Sent to the buyer.</Alert>
       </div>
     );
   }
 
   return (
-    <div className="card stack stack--sm">
-      <div className="split">
-        <span className="badge">{HANDOFF_REASON[handoff.reason]}</span>
-        <div className="cluster cluster--sm">
-          {handoff.shortCode && <span className="badge badge--muted">Chat code {handoff.shortCode}</span>}
-          {deadline && <span className={`badge badge--${deadline.urgent ? 'danger' : 'muted'}`}>{deadline.text}</span>}
-        </div>
+    <div className="card stack stack--panel">
+      <div className="cluster">
+        <h2>Question from a buyer</h2>
+        {handoff.shortCode && <span className="badge badge--muted badge--code">Code {handoff.shortCode}</span>}
+        {deadline && <span className={`badge badge--${deadline.urgent ? 'danger' : 'accent'}`}>{deadline.text}</span>}
+        <span className="text-xs text-muted handoff-reason">{HANDOFF_REASON[handoff.reason]}</span>
       </div>
 
-      <p>
-        Buyer asked: &ldquo;{handoff.buyerQuestion}&rdquo;
-        {now != null && <span className="text-sm text-muted"> · asked {timeAgo(handoff.askedAt, now)}</span>}
-      </p>
+      <ConversationView token={token} conversationId={handoff.conversationId} version={handoff.status} highlightLast />
 
       <div className="field">
-        <span className="field-label">
+        <label className="field-label" htmlFor={`reply-${handoff._id}`}>
           {handoff.suggestedReply ? (
             <>
               Suggested reply — edit before you send <span className="badge badge--accent">AI draft</span>
@@ -88,11 +85,10 @@ export function HandoffCard({ handoff, token, onAction }: { handoff: FeedHandoff
           ) : (
             'Your reply'
           )}
-        </span>
-        <textarea className="textarea" rows={3} value={reply} onChange={(event) => setReply(event.target.value)} placeholder="Type your reply to the buyer" />
+        </label>
+        <textarea id={`reply-${handoff._id}`} className="textarea" rows={3} value={reply} onChange={(event) => setReply(event.target.value)} placeholder="Type your reply to the buyer" />
+        {handoff.shortCode && <p className="field-hint">You can also answer from WhatsApp: reply &lsquo;{handoff.shortCode} your message&rsquo;.</p>}
       </div>
-
-      {handoff.shortCode && <p className="field-hint">You can also answer from WhatsApp: reply &lsquo;{handoff.shortCode} your message&rsquo;.</p>}
 
       {actionError && <Alert variant="danger" inline>{actionError}</Alert>}
 

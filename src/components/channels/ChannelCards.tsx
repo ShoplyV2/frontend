@@ -14,12 +14,12 @@ import type { ChannelSummary } from '@/lib/types';
 
 // --- Telegram ---------------------------------------------------------------
 
-export function TelegramCard({ token, channel, refresh, canDisconnect = false }: { token: string; channel: ChannelSummary | undefined; refresh: () => Promise<void>; canDisconnect?: boolean }) {
+/** The how-to and the token box for connecting a Telegram bot, with no card around it. */
+export function TelegramConnectForm({ token, refresh, onConnected, onCancel }: { token: string; refresh: () => Promise<void>; onConnected?: () => void; onCancel?: () => void }) {
   const toast = useToast();
   const [botToken, setBotToken] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<unknown>(null);
-  const [replacing, setReplacing] = useState(false);
 
   async function handleConnect(event: React.FormEvent) {
     event.preventDefault();
@@ -29,7 +29,7 @@ export function TelegramCard({ token, channel, refresh, canDisconnect = false }:
     try {
       await connectTelegramChannel(token, botToken.trim());
       setBotToken('');
-      setReplacing(false);
+      onConnected?.();
       toast({ tone: 'success', text: 'Bot connected. One more tap to finish.' });
       await refresh();
     } catch (err) {
@@ -39,6 +39,55 @@ export function TelegramCard({ token, channel, refresh, canDisconnect = false }:
     }
   }
 
+  return (
+    <>
+      <ol className="stack steps-list">
+        <li>
+          <strong>Open Telegram and search for @BotFather.</strong>
+          <p className="field-hint">It&apos;s Telegram&apos;s official bot for making bots.</p>
+        </li>
+        <li>
+          <strong>Send /newbot and follow the prompts.</strong>
+          <p className="field-hint">
+            Pick any display name, then a username ending in <code>bot</code>, like <code>ama_boutique_bot</code>.
+          </p>
+        </li>
+        <li>
+          <strong>Copy the long token BotFather sends you.</strong>
+          <p className="field-hint">
+            It looks like <code>12345:AAExample-Token</code>.
+          </p>
+        </li>
+        <li>
+          <strong>Paste it here.</strong>
+        </li>
+      </ol>
+      {error != null && <Alert variant="danger">{sellerMessage(error, 'Could not connect that bot.')}</Alert>}
+      <form className="cluster" onSubmit={handleConnect}>
+        <input
+          type="password"
+          className="input field--grow"
+          placeholder="Bot token from BotFather"
+          autoComplete="off"
+          aria-label="Telegram bot token"
+          value={botToken}
+          onChange={(event) => setBotToken(event.target.value)}
+        />
+        <button type="submit" className="btn btn--primary" disabled={connecting || !botToken.trim()}>
+          {connecting ? 'Connecting…' : 'Connect'}
+        </button>
+      </form>
+      {onCancel && (
+        <button type="button" className="btn btn--ghost btn--sm self-start" onClick={onCancel}>
+          Cancel
+        </button>
+      )}
+    </>
+  );
+}
+
+export function TelegramCard({ token, channel, refresh, canDisconnect = false }: { token: string; channel: ChannelSummary | undefined; refresh: () => Promise<void>; canDisconnect?: boolean }) {
+  const [replacing, setReplacing] = useState(false);
   const showForm = !channel || replacing;
 
   return (
@@ -50,51 +99,7 @@ export function TelegramCard({ token, channel, refresh, canDisconnect = false }:
 
       {channel && !replacing && <ChannelState token={token} channel={channel} refresh={refresh} onReplace={() => setReplacing(true)} canDisconnect={canDisconnect} />}
 
-      {showForm && (
-        <>
-          <ol className="stack stack--sm">
-            <li>
-              <strong>Open Telegram and search for @BotFather.</strong>
-              <p className="field-hint">It&apos;s Telegram&apos;s official bot for making bots.</p>
-            </li>
-            <li>
-              <strong>Send /newbot and follow the prompts.</strong>
-              <p className="field-hint">
-                Pick any display name, then a username ending in <code>bot</code>, like <code>ama_boutique_bot</code>.
-              </p>
-            </li>
-            <li>
-              <strong>Copy the long token BotFather sends you.</strong>
-              <p className="field-hint">
-                It looks like <code>12345:AAExample-Token</code>.
-              </p>
-            </li>
-            <li>
-              <strong>Paste it here.</strong>
-            </li>
-          </ol>
-          {error != null && <Alert variant="danger">{sellerMessage(error, 'Could not connect that bot.')}</Alert>}
-          <form className="cluster" onSubmit={handleConnect}>
-            <input
-              type="password"
-              className="input field--grow"
-              placeholder="Bot token from BotFather"
-              autoComplete="off"
-              aria-label="Telegram bot token"
-              value={botToken}
-              onChange={(event) => setBotToken(event.target.value)}
-            />
-            <button type="submit" className="btn btn--primary" disabled={connecting || !botToken.trim()}>
-              {connecting ? 'Connecting…' : 'Connect'}
-            </button>
-          </form>
-          {replacing && (
-            <button type="button" className="btn btn--ghost btn--sm self-start" onClick={() => setReplacing(false)}>
-              Cancel
-            </button>
-          )}
-        </>
-      )}
+      {showForm && <TelegramConnectForm token={token} refresh={refresh} onConnected={() => setReplacing(false)} onCancel={replacing ? () => setReplacing(false) : undefined} />}
     </div>
   );
 }
@@ -232,7 +237,7 @@ function ChannelState({ canDisconnect = false, ...props }: ChannelStateProps) {
   );
 }
 
-function DisconnectButton({ token, channel, refresh }: { token: string; channel: ChannelSummary; refresh: () => Promise<void> }) {
+export function DisconnectButton({ token, channel, refresh, inline = false }: { token: string; channel: ChannelSummary; refresh: () => Promise<void>; inline?: boolean }) {
   const confirm = useConfirm();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -264,9 +269,124 @@ function DisconnectButton({ token, channel, refresh }: { token: string; channel:
   return (
     <>
       {error != null && <Alert variant="danger">{sellerMessage(error, 'Could not disconnect that.')}</Alert>}
-      <button type="button" className="btn btn--secondary btn--sm self-start" onClick={handleDisconnect} disabled={busy}>
+      <button type="button" className={inline ? 'btn btn--secondary' : 'btn btn--secondary btn--sm self-start'} onClick={handleDisconnect} disabled={busy}>
         {busy ? 'Disconnecting…' : 'Disconnect'}
       </button>
     </>
+  );
+}
+
+
+// --- The Shop page's single "Chat apps" card: one row per app ----------------
+
+function RowIcon({ on }: { on: boolean }) {
+  return (
+    <span className={`channel-row-icon${on ? ' channel-row-icon--on' : ''}`} aria-hidden="true">
+      {on ? (
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12l5 5 9-10" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      )}
+    </span>
+  );
+}
+
+function ChannelRow({ on, title, note, action, children }: { on: boolean; title: string; note: string; action?: React.ReactNode; children?: React.ReactNode }) {
+  return (
+    <div className="channel-row">
+      <div className="channel-row-main">
+        <RowIcon on={on} />
+        <div className="channel-row-text">
+          <p className="channel-row-title">{title}</p>
+          <p className="channel-row-note">{note}</p>
+        </div>
+        {action}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/** Telegram and WhatsApp in one card, a row each: what's connected, and the one thing to do next. */
+export function ChatAppsCard({ token, channels, whatsappRequestedAt, refresh }: { token: string; channels: ChannelSummary[]; whatsappRequestedAt: string | null; refresh: () => Promise<void> }) {
+  const toast = useToast();
+  const telegram = channels.find((c) => c.kind === 'telegram');
+  const whatsapp = channels.find((c) => c.kind === 'whatsapp');
+  const [connectOpen, setConnectOpen] = useState(false);
+  const [requesting, setRequesting] = useState(false);
+  const [requestError, setRequestError] = useState<unknown>(null);
+
+  async function handleRequest() {
+    setRequesting(true);
+    setRequestError(null);
+    try {
+      await requestWhatsAppConnection(token);
+      toast({ tone: 'success', text: "Request sent. We'll connect your WhatsApp and message you." });
+      await refresh();
+    } catch (err) {
+      setRequestError(err);
+    } finally {
+      setRequesting(false);
+    }
+  }
+
+  const nameOf = (c: ChannelSummary) => c.displayName ?? channelFallbackName(c.kind);
+
+  return (
+    <div className="card stack">
+      <h2>Chat apps</h2>
+
+      {telegram?.sellerContactId ? (
+        <ChannelRow on title={`Telegram · ${nameOf(telegram)}`} note="Connected. Order alerts arrive here." action={<DisconnectButton token={token} channel={telegram} refresh={refresh} inline />} />
+      ) : telegram ? (
+        <ChannelRow on={false} title={`Telegram · ${nameOf(telegram)}`} note="One more step to finish.">
+          <ChannelStatus token={token} channel={telegram} refresh={refresh} />
+        </ChannelRow>
+      ) : (
+        <ChannelRow
+          on={false}
+          title="Telegram"
+          note="Connect it with a bot token. You do this one yourself."
+          action={
+            <button type="button" className="btn btn--secondary" aria-expanded={connectOpen} onClick={() => setConnectOpen((o) => !o)}>
+              {connectOpen ? 'Close' : 'Connect'}
+            </button>
+          }
+        >
+          {connectOpen && (
+            <div className="stack channel-row-body">
+              <TelegramConnectForm token={token} refresh={refresh} onConnected={() => setConnectOpen(false)} />
+            </div>
+          )}
+        </ChannelRow>
+      )}
+
+      {whatsapp?.sellerContactId ? (
+        <ChannelRow on title={`WhatsApp · ${nameOf(whatsapp)}`} note="Connected. Order alerts arrive here." action={<DisconnectButton token={token} channel={whatsapp} refresh={refresh} inline />} />
+      ) : whatsapp ? (
+        <ChannelRow on={false} title={`WhatsApp · ${nameOf(whatsapp)}`} note="One more step to finish.">
+          <ChannelStatus token={token} channel={whatsapp} refresh={refresh} />
+        </ChannelRow>
+      ) : whatsappRequestedAt ? (
+        <ChannelRow on={false} title="WhatsApp" note="Requested. Our team will connect your number and message you." />
+      ) : (
+        <ChannelRow
+          on={false}
+          title="WhatsApp"
+          note="Our team connects it for you."
+          action={
+            <button type="button" className="btn btn--secondary" onClick={handleRequest} disabled={requesting}>
+              {requesting ? 'Sending…' : 'Request WhatsApp'}
+            </button>
+          }
+        >
+          {requestError != null && <Alert variant="danger">{sellerMessage(requestError, 'Could not send your request.')}</Alert>}
+        </ChannelRow>
+      )}
+    </div>
   );
 }

@@ -12,7 +12,7 @@ import { Alert } from '@/components/ui/Alert';
  * from the seller's side it is final: the shop stops answering buyers and they are signed out. So it
  * asks for the password again, which also stops someone with a borrowed, signed-in phone from doing it.
  */
-export function DeleteAccount({ token, onDeleted }: { token: string; onDeleted: () => void }) {
+export function DeleteAccount({ token, onDeleted, compact = false }: { token: string; onDeleted: () => void; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -38,12 +38,20 @@ export function DeleteAccount({ token, onDeleted }: { token: string; onDeleted: 
   }
 
   return (
-    <div className="card card--danger stack stack--sm">
-      <h2>Close your shop</h2>
-      <p className="text-secondary">Your shop stops answering buyers and you&apos;re signed out. You can&apos;t sign back in or reuse this email.</p>
-      <button type="button" className="btn btn--danger self-start" onClick={() => setOpen(true)}>
-        Delete my account
-      </button>
+    <div className={compact ? 'delete-compact' : 'card card--danger stack stack--sm'}>
+      {compact ? (
+        <button type="button" className="btn btn--ghost delete-link" onClick={() => setOpen(true)}>
+          Close your shop
+        </button>
+      ) : (
+        <>
+          <h2>Close your shop</h2>
+          <p className="text-secondary">Your shop stops answering buyers and you&apos;re signed out. You can&apos;t sign back in or reuse this email.</p>
+          <button type="button" className="btn btn--danger self-start" onClick={() => setOpen(true)}>
+            Delete my account
+          </button>
+        </>
+      )}
 
       <Sheet open={open} onClose={close} title="Delete your account">
         <form onSubmit={handleDelete} className="stack">

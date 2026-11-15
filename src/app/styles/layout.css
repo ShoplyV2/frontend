@@ -55,13 +55,16 @@
 /* ---------- page header: title, optional subtitle, optional action ---------- */
 .page-header {
   display: flex;
-  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: var(--space-4);
 }
 .page-header-text {
+  flex: 1;
   min-inline-size: 0;
+}
+.page-header > :not(.page-header-text) {
+  flex: none;
 }
 .page-subtitle {
   margin-block-start: 0.25rem;

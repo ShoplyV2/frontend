@@ -75,6 +75,7 @@ export default function SignupPage() {
             className="input"
             type="email"
             inputMode="email"
+            placeholder="you@example.com"
             autoComplete="username"
             autoCapitalize="none"
             value={email}
@@ -89,12 +90,12 @@ export default function SignupPage() {
           autoComplete="new-password"
           hint={`At least ${MIN_PASSWORD_LENGTH} characters.`}
         />
-        <button type="submit" className="btn btn--primary" disabled={submitting || !canSubmit}>
+        <button type="submit" className="btn btn--primary btn--lg" disabled={submitting || !canSubmit}>
           {submitting ? 'Creating…' : 'Create my shop'}
         </button>
       </form>
 
-      <p className="text-sm">
+      <p className="auth-switch">
         Already have a shop? <Link href="/login">Sign in</Link>
       </p>
     </AuthLayout>

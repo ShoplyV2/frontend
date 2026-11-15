@@ -29,7 +29,7 @@ export function TestStep({ token, shopName, channels, onBack, onNext }: { token:
   }
 
   return (
-    <div className="stack">
+    <div className="step step--620">
       <StepHeading title="Try it, then share it">Make sure alerts reach you, and get the link buyers use to message your shop.</StepHeading>
 
       <div className="card stack">
@@ -40,17 +40,24 @@ export function TestStep({ token, shopName, channels, onBack, onNext }: { token:
           const name = channel.displayName ?? channelFallbackName(channel.kind);
           const done = sent.has(channel.routingId);
           return (
-            <div key={channel.routingId} className="stack stack--xs">
-              <div className="split">
+            <div key={channel.routingId} className="stack stack--sm">
+              <div className="split test-row">
                 <span className="cluster cluster--sm">
                   <span className="badge">{CHANNEL_KIND[channel.kind]}</span>
-                  {name}
+                  <span className="test-row-name">{name}</span>
                 </span>
-                <button type="button" className={`btn btn--sm ${done ? 'btn--secondary' : 'btn--primary'}`} onClick={() => handleTest(channel)} disabled={sending === channel.routingId}>
+                <button type="button" className={`btn ${done ? 'btn--secondary' : 'btn--primary'}`} onClick={() => handleTest(channel)} disabled={sending === channel.routingId}>
                   {sending === channel.routingId ? 'Sending…' : done ? 'Send again' : 'Send test message'}
                 </button>
               </div>
-              {done && <p className="field-hint">Sent. Check {CHANNEL_KIND[channel.kind]} on your phone.</p>}
+              {done && (
+                <p className="sent-note">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M5 12l5 5 9-10" />
+                  </svg>
+                  Sent. Check {CHANNEL_KIND[channel.kind]} on your phone.
+                </p>
+              )}
             </div>
           );
         })}
@@ -63,7 +70,7 @@ export function TestStep({ token, shopName, channels, onBack, onNext }: { token:
       </div>
 
       <StepFooter onBack={onBack}>
-        <button type="button" className="btn btn--primary" onClick={onNext}>
+        <button type="button" className="btn btn--primary btn--lg" onClick={onNext}>
           Continue
         </button>
       </StepFooter>

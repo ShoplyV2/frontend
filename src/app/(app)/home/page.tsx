@@ -93,6 +93,8 @@ export default function HomePage() {
           <>
             <StatsStrip orders={feed.orders} />
 
+            <FinishSetup token={token} profile={profile} state={state} channels={channels} refresh={setup.refresh} />
+
             <div className="home-grid">
               <QueueList queue={queue} filter={filter} onFilter={setFilter} selectedKey={selected?.key ?? null} onSelect={setSelectedKey} />
               {isWide && <div className="home-detail">{detail ?? <p className="text-muted">Pick something from the list to see it here.</p>}</div>}
@@ -103,7 +105,6 @@ export default function HomePage() {
               </Sheet>
             )}
 
-            <FinishSetup token={token} profile={profile} state={state} channels={channels} refresh={setup.refresh} />
           </>
         )}
       </div>

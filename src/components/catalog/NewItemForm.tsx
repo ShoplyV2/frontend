@@ -172,68 +172,81 @@ export function NewItemForm({
     )}
 
 
-    <form onSubmit={handleSubmit} className="stack">
-      <div className={`form-grid${layout === 'split' ? ' form-grid--split' : ''}`}>
-        <div className="field field--full" ref={photoRef}>
-          <span className="field-label">Photo</span>
-          <label className="file-tile file-tile--photo">
+    <form onSubmit={handleSubmit} className="stack stack--panel">
+      <div className={`item-form-top item-form-top--${layout}`}>
+        <div className="item-photo" ref={photoRef}>
+          <label className="photo-drop">
             {previewUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- local object URL preview, not an optimizable asset
-              <img src={previewUrl} alt="" className="file-tile-img" />
-            ) : preparingPhoto ? (
-              <span>Preparing…</span>
+              <img src={previewUrl} alt="" />
             ) : (
-              <span>Take a photo or choose one</span>
+              <>
+                <span className="photo-drop-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+                    <circle cx="12" cy="13" r="3.5" />
+                  </svg>
+                </span>
+                <span className="photo-drop-title">{preparingPhoto ? 'Preparing…' : 'Take a photo or choose one'}</span>
+                <span className="photo-drop-hint">Clear, well-lit, one item. JPG, PNG or WebP, under 8 MB.</span>
+              </>
             )}
-            <input
-              type="file"
-              accept={ACCEPT_ATTR}
-              onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
-            />
+            <input type="file" accept={ACCEPT_ATTR} onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)} />
           </label>
           {previewUrl && (
             <button type="button" className="btn btn--secondary btn--sm self-start" onClick={() => handleFileChange(null)}>
               Change photo
             </button>
           )}
-          <p className="field-hint">Clear, well-lit, one item. JPG, PNG or WebP, under 8 MB.</p>
           {photoError && <p className="field-error">{photoError}</p>}
         </div>
 
-        <div className="field field--full">
-          <label className="field-label" htmlFor="item-name">
-            What is it?
-          </label>
-          <input id="item-name" ref={nameRef} className="input" type="text" placeholder="Black leather crossbody bag" value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
+        <div className="item-fields stack">
+          <div className="field">
+            <label className="field-label" htmlFor="item-name">
+              What is it?
+            </label>
+            <input id="item-name" ref={nameRef} className="input" type="text" placeholder="Black leather crossbody bag" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
 
-        <div className="field field--full">
-          <label className="field-label" htmlFor="item-description">
-            Describe it for buyers
-          </label>
-          <textarea id="item-description" ref={descriptionRef} className="textarea" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
-          <p className="field-hint">
-            Include the colour and what kind of thing it is — that&apos;s how photo matching finds it. {description.trim().length} / {MIN_ITEM_DESCRIPTION} characters
-          </p>
-        </div>
+          <div className="field">
+            <label className="field-label" htmlFor="item-price">
+              Price (GHS)
+            </label>
+            <input id="item-price" ref={priceRef} className="input" type="number" inputMode="decimal" min="0" step="0.01" placeholder="0.00" value={basePriceMajor} onChange={(e) => setBasePriceMajor(e.target.value)} />
+          </div>
 
-        <div className="field">
-          <label className="field-label" htmlFor="item-price">
-            Price (GHS)
-          </label>
-          <input id="item-price" ref={priceRef} className="input" type="number" inputMode="decimal" min="0" step="0.01" value={basePriceMajor} onChange={(e) => setBasePriceMajor(e.target.value)} />
+          <div className="field">
+            <label className="field-label" htmlFor="item-description">
+              Describe it for buyers
+            </label>
+            <textarea
+              id="item-description"
+              ref={descriptionRef}
+              className="textarea"
+              rows={3}
+              placeholder="Include the colour and what kind of thing it is"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <p className="field-hint">
+              That&apos;s how photo matching finds it. {description.trim().length} / {MIN_ITEM_DESCRIPTION} characters
+            </p>
+          </div>
         </div>
       </div>
 
       <div className="stack stack--sm" ref={variantsRef}>
-        <p className="field-label">Sizes &amp; colours</p>
-        <p className="field-hint">Add one row for each colour and size you have.</p>
+        <div>
+          <p className="field-label">Sizes and colours</p>
+          <p className="field-hint">Add one row for each colour and size you have.</p>
+        </div>
         <div className="stack stack--sm">
           {variantRows.map((row, index) => (
             <div key={index} className="cluster">
-              <input className="input field--grow" type="text" placeholder="Color" value={row.color} onChange={(e) => updateRow(index, { color: e.target.value })} />
-              <input className="input field--grow" type="text" placeholder="Size" value={row.size} onChange={(e) => updateRow(index, { size: e.target.value })} />
-              <input className="input input--number" type="number" min="0" placeholder="Stock" value={row.stock} onChange={(e) => updateRow(index, { stock: e.target.value })} />
+              <input className="input field--grow" type="text" aria-label="Colour" placeholder="Colour" value={row.color} onChange={(e) => updateRow(index, { color: e.target.value })} />
+              <input className="input field--grow" type="text" aria-label="Size" placeholder="Size" value={row.size} onChange={(e) => updateRow(index, { size: e.target.value })} />
+              <input className="input input--number" type="number" min="0" inputMode="numeric" aria-label="Stock" placeholder="Stock" value={row.stock} onChange={(e) => updateRow(index, { stock: e.target.value })} />
               {variantRows.length > 1 && (
                 <button type="button" className="btn btn--ghost btn--icon btn--sm" aria-label="Remove this size" onClick={() => removeRow(index)}>
                   ✕
@@ -242,13 +255,13 @@ export function NewItemForm({
             </div>
           ))}
         </div>
-        <button type="button" className="btn btn--secondary btn--sm self-start" onClick={addRow}>
-          ＋ Add another
+        <button type="button" className="btn btn--link self-start" onClick={addRow}>
+          + Add another
         </button>
       </div>
 
-      <div className="form-actions">
-        <button type="submit" className="btn btn--primary" data-loading={phase !== 'idle' || undefined}>
+      <div className="item-form-actions">
+        <button type="submit" className="btn btn--primary btn--lg" data-loading={phase !== 'idle' || undefined}>
           {phase === 'uploading' ? 'Uploading photo…' : phase === 'saving' ? 'Saving…' : submitLabel}
         </button>
       </div>

@@ -52,28 +52,28 @@ export function OpenStep({
 
   if (opened) {
     return (
-      <div className="stack">
-        <div className="wizard-success">
-          <span className="wizard-success-mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12.5l4.5 4.5L19 7.5" />
-            </svg>
-          </span>
-          <StepHeading title="Your shop is open">Buyers can message your shop now and your assistant will answer them. Anything it can&apos;t handle shows up under Orders.</StepHeading>
-        </div>
-        <div className="card stack stack--sm">
-          <h2>Share your link</h2>
+      <div className="step step--card step--560 step--center">
+        <span className="wizard-success-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12l5 5 9-10" />
+          </svg>
+        </span>
+        <span className="badge badge--accent">Open for orders</span>
+        <StepHeading title="Your shop is open">Buyers can message your shop now and your assistant will answer them. Anything it can&apos;t handle shows up in your queue.</StepHeading>
+        <div className="step-panel">
+          <p className="label">Share your link</p>
           <ShareLinks shopName={shopName} channels={channels} />
         </div>
-        <Link href="/home" className="btn btn--primary">
+        <Link href="/home" className="btn btn--primary btn--lg btn--block">
           Go to my shop
         </Link>
+        <p className="text-sm text-muted">Bank payout isn&apos;t needed to open. You can add it any time from Home.</p>
       </div>
     );
   }
 
   return (
-    <div className="stack">
+    <div className="step step--card step--560">
       <StepHeading title="Ready to open?">Once your shop is open, buyers who message it get answers from your assistant.</StepHeading>
 
       {!state.ready && (
@@ -94,7 +94,7 @@ export function OpenStep({
       {error != null && state.ready && <Alert variant="danger">{sellerMessage(error, 'Could not open your shop yet.')}</Alert>}
 
       <StepFooter onBack={onBack}>
-        <button type="button" className="btn btn--primary" onClick={handleOpen} disabled={!state.ready || opening}>
+        <button type="button" className="btn btn--primary btn--lg" onClick={handleOpen} disabled={!state.ready || opening}>
           {opening ? 'Opening…' : 'Open my shop'}
         </button>
       </StepFooter>

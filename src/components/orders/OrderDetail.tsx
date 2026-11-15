@@ -5,8 +5,7 @@ import { dispatchOrder, deliverOrder, markSoldOut } from '@/lib/apiClient';
 import { formatMoney, mapsHref, telHref } from '@/lib/format';
 import { sellerMessage } from '@/lib/errorMessage';
 import { ORDER_STATUS, STOCK_LOST_ALERT, paymentChannelLabel } from '@/lib/labels';
-import { clockTime, dayLabel, timeAgo } from '@/lib/time';
-import { useNow } from '@/lib/useNow';
+import { clockTime, dayLabel } from '@/lib/time';
 import { useConfirm } from '@/components/ui/ConfirmProvider';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Alert } from '@/components/ui/Alert';
@@ -35,7 +34,6 @@ const STEPS: Array<{ status: FeedOrder['status']; label: string }> = [
  * and in Home's detail pane.
  */
 export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; token: string; onPatched: (order: FeedOrder) => void }) {
-  const now = useNow();
   const confirm = useConfirm();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
@@ -90,133 +88,123 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
     }
   }
 
+  const photo = order.item.imageUrlSnapshot;
+
   return (
-    <div className="stack">
-      <div className="cluster order-head">
-        {order.item.imageUrlSnapshot ? (
-          // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
-          <img src={order.item.imageUrlSnapshot} alt="" className="thumb thumb--lg" />
-        ) : (
-          <div className="thumb thumb--lg" />
-        )}
+    <div className="stack stack--panel">
+      <div className="order-head">
+        <span className="tile tile--52" aria-hidden="true">
+          {photo ? (
+            // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
+            <img src={photo} alt="" />
+          ) : (
+            <svg viewBox="0 0 48 48" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 18h24l2.5 22h-29L12 18z" />
+              <path d="M18 18a6 6 0 0 1 12 0" />
+            </svg>
+          )}
+        </span>
         <div className="order-head-text">
           <h2>{order.item.nameSnapshot}</h2>
           <p className="text-sm text-muted">
             {order.variant.color}, {order.variant.size} × {order.qty}
           </p>
         </div>
-        <span className={`badge badge--${statusInfo.tone}`}>{statusInfo.label}</span>
+        <div className="order-head-side">
+          <p className="order-amount tabular">{formatMoney(order.total, order.currency)}</p>
+          <span className={`badge badge--${statusInfo.tone}`}>{statusInfo.label}</span>
+        </div>
       </div>
 
       {order.fulfillmentRisk === 'STOCK_LOST' && <Alert variant="danger">{STOCK_LOST_ALERT}</Alert>}
-      <p className="text-secondary">{statusInfo.hint}</p>
+      {order.status === 'AWAITING_PAYMENT' && <p className="note note--warning">{statusInfo.hint}</p>}
 
-      {!closed && (
-        <ol className="order-steps" aria-label="Order progress">
-          {STEPS.map((step) => {
-            const at = reachedAt(order, step.status);
-            return (
-              <li key={step.status} className="order-step" data-done={at ? 'true' : 'false'}>
-                <span className="order-step-dot" aria-hidden="true" />
-                <span className="order-step-label">{step.label}</span>
-                <span className="text-xs text-muted">{at ? stamp(at) : ''}</span>
-              </li>
-            );
-          })}
-        </ol>
+      <div className="order-boxes">
+        <div className="order-box">
+          <p className="label">Buyer</p>
+          <p className="order-box-main">{order.delivery.name || order.buyer.name || 'Buyer'}</p>
+          <a href={telHref(phone)} className="order-box-link">
+            {phone}
+          </a>
+        </div>
+        <div className="order-box">
+          <p className="label">Deliver to</p>
+          <p className="order-box-main">{order.delivery.area}</p>
+          <a href={mapsHref(order.delivery.area, order.delivery.address)} target="_blank" rel="noreferrer" className="order-box-link">
+            {order.delivery.address} · Open in Maps
+          </a>
+        </div>
+      </div>
+      {order.delivery.notes && (
+        <div className="order-box">
+          <p className="label">Note from the buyer</p>
+          <p className="order-box-main">{order.delivery.notes}</p>
+        </div>
       )}
 
-      <section className="section">
-        <p className="section-title">Payment</p>
-        <dl className="facts">
-          <div>
-            <dt>Total</dt>
-            <dd className="tabular">{formatMoney(order.total, order.currency)}</dd>
-          </div>
-          <div>
-            <dt>
-              {order.qty} × {formatMoney(order.unitPrice, order.currency)}
-            </dt>
-            <dd className="tabular">{formatMoney(order.subtotal, order.currency)}</dd>
-          </div>
+      <dl className="facts">
+        {order.deliveryFee > 0 && (
           <div>
             <dt>Delivery</dt>
             <dd className="tabular">{formatMoney(order.deliveryFee, order.currency)}</dd>
           </div>
-          {order.payment.paidAt ? (
-            <div>
-              <dt>Paid by</dt>
-              <dd>
-                {paymentChannelLabel(order.payment.channel)}
-                {now != null && <span className="text-muted"> · {timeAgo(order.payment.paidAt, now)}</span>}
-              </dd>
-            </div>
-          ) : (
-            <div>
-              <dt>Paid by</dt>
-              <dd className="text-muted">Not paid yet</dd>
-            </div>
-          )}
-        </dl>
-      </section>
+        )}
+        <div>
+          <dt>Payment</dt>
+          <dd>
+            {order.payment.paidAt ? `${paymentChannelLabel(order.payment.channel)} · ${clockTime(order.payment.paidAt)}` : <span className="text-muted">Not paid yet</span>}
+          </dd>
+        </div>
+      </dl>
 
-      <section className="section">
-        <p className="section-title">Buyer and delivery</p>
-        <dl className="facts">
-          <div>
-            <dt>Buyer</dt>
-            <dd>
-              {order.delivery.name || order.buyer.name || 'Buyer'} · <a href={telHref(phone)}>{phone}</a>
-            </dd>
-          </div>
-          <div>
-            <dt>Deliver to</dt>
-            <dd>
-              <strong>{order.delivery.area}</strong>, {order.delivery.address} ·{' '}
-              <a href={mapsHref(order.delivery.area, order.delivery.address)} target="_blank" rel="noreferrer">
-                Open in Maps
-              </a>
-            </dd>
-          </div>
-          {order.delivery.notes && (
-            <div>
-              <dt>Note</dt>
-              <dd>{order.delivery.notes}</dd>
-            </div>
-          )}
-        </dl>
-      </section>
+      {!closed && (
+        <div>
+          <p className="label order-steps-label">Progress</p>
+          <ol className="order-steps" aria-label="Order progress">
+            {STEPS.map((step) => {
+              const at = reachedAt(order, step.status);
+              return (
+                <li key={step.status} className="order-step" data-done={at ? 'true' : 'false'}>
+                  <span className="order-step-dot" aria-hidden="true">
+                    {at && (
+                      <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12l5 5 9-10" />
+                      </svg>
+                    )}
+                  </span>
+                  <span>{step.label}</span>
+                  <span className="order-step-time">{at ? stamp(at) : ''}</span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      )}
 
       {actionError && <Alert variant="danger" inline>{actionError}</Alert>}
 
-      <div className="card-actions">
-        {(order.status === 'AWAITING_PAYMENT' || order.status === 'PAID') && (
-          <button type="button" className="btn btn--secondary btn--sm" disabled={busy} onClick={handleHideSize}>
-            Hide this size
-          </button>
-        )}
+      <div className="order-actions">
         {order.status === 'PAID' && (
-          <button type="button" className="btn btn--primary btn--sm" disabled={busy} onClick={handleDispatch}>
+          <button type="button" className="btn btn--primary btn--block" disabled={busy} onClick={handleDispatch}>
             Mark as sent
           </button>
         )}
         {order.status === 'DISPATCHED' && (
-          <button type="button" className="btn btn--primary btn--sm" disabled={busy} onClick={handleDeliver}>
+          <button type="button" className="btn btn--primary btn--block" disabled={busy} onClick={handleDeliver}>
             Mark as delivered
+          </button>
+        )}
+        <button type="button" className="btn btn--secondary btn--block" aria-expanded={chatOpen} onClick={() => setChatOpen((o) => !o)}>
+          {chatOpen ? 'Hide chat with this buyer' : 'Show chat with this buyer'}
+        </button>
+        {(order.status === 'AWAITING_PAYMENT' || order.status === 'PAID') && (
+          <button type="button" className="btn btn--quiet" disabled={busy} onClick={handleHideSize}>
+            Hide this size
           </button>
         )}
       </div>
 
-      <section className="section">
-        <button type="button" className="btn btn--ghost btn--sm self-start" aria-expanded={chatOpen} onClick={() => setChatOpen((o) => !o)}>
-          {chatOpen ? 'Hide chat with this buyer' : 'Show chat with this buyer'}
-        </button>
-        {chatOpen && (
-          <div className="card">
-            <ConversationView token={token} conversationId={order.conversationId} version={order.status} />
-          </div>
-        )}
-      </section>
+      {chatOpen && <ConversationView token={token} conversationId={order.conversationId} version={order.status} />}
     </div>
   );
 }

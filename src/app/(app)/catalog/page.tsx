@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useCatalog } from '@/lib/useCatalog';
 import { sellerMessage } from '@/lib/errorMessage';
-import { CATALOG_WARNING, PHOTO_PROCESSING } from '@/lib/labels';
+import { CATALOG_WARNING } from '@/lib/labels';
 import { updateCatalogItem } from '@/lib/apiClient';
 import { useToast } from '@/components/ui/ToastProvider';
 import type { CatalogItem } from '@/lib/types';
@@ -24,7 +24,8 @@ export default function CatalogPage() {
 
   const counts = { all: items.length, in: items.filter((i) => totalStock(i) > 0).length, out: items.filter((i) => totalStock(i) === 0).length };
   const shown = items.filter((i) => (filter === 'in' ? totalStock(i) > 0 : filter === 'out' ? totalStock(i) === 0 : true));
-  const photosPending = items.some((i) => !i.visionReady);
+  const pendingPhotoCount = items.filter((i) => !i.visionReady).length;
+  const photosPending = pendingPhotoCount > 0;
 
   // Flips at once and puts it back if the server says no.
   async function handleToggle(item: CatalogItem) {
@@ -61,33 +62,19 @@ export default function CatalogPage() {
         )}
 
         {warnings.includes('VISION_CANDIDATE_CAP_EXCEEDED') && !warningDismissed && (
-          <Alert
-            variant="warning"
-            action={
-              <button className="btn btn--ghost btn--sm" onClick={() => setWarningDismissed(true)}>
-                Dismiss
-              </button>
-            }
-          >
+          <Alert variant="warning" flat onDismiss={() => setWarningDismissed(true)}>
             {CATALOG_WARNING.VISION_CANDIDATE_CAP_EXCEEDED}
           </Alert>
         )}
 
         {photosPending && !photoNoteDismissed && (
-          <Alert
-            variant="info"
-            action={
-              <button className="btn btn--ghost btn--sm" onClick={() => setPhotoNoteDismissed(true)}>
-                Dismiss
-              </button>
-            }
-          >
-            {PHOTO_PROCESSING.hint} Items still processing are marked on their card.
+          <Alert variant="warning" flat onDismiss={() => setPhotoNoteDismissed(true)}>
+            Photo matching is still getting ready for {pendingPhotoCount} {pendingPhotoCount === 1 ? 'item' : 'items'}. Buyers can still order {pendingPhotoCount === 1 ? 'it' : 'them'} by name.
           </Alert>
         )}
 
         {items.length > 0 && (
-          <div className="pill-group" role="group" aria-label="Filter items">
+          <div className="pill-group pill-group--scroll" role="group" aria-label="Filter items">
             {([['all', 'All'], ['in', 'In stock'], ['out', 'Sold out']] as const).map(([key, label]) => (
               <button key={key} type="button" className="pill" aria-pressed={filter === key} onClick={() => setFilter(key)}>
                 {label} <span className="pill-count">{counts[key]}</span>

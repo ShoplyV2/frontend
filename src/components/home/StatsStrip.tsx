@@ -16,17 +16,17 @@ export function StatsStrip({ orders }: { orders: FeedOrder[] }) {
       <div className="stat">
         <dt>Paid today</dt>
         <dd className="tabular">{formatMoney(s.paidToday, s.currency)}</dd>
-        <p className="stat-note">{s.paidTodayCount === 1 ? '1 order' : `${s.paidTodayCount} orders`}</p>
       </div>
       <div className="stat">
         <dt>To send</dt>
         <dd className="tabular">{s.toSendCount}</dd>
-        <p className="stat-note">paid, not yet sent</p>
       </div>
       <div className="stat">
-        <dt>Waiting for payment</dt>
-        <dd className="tabular">{s.waitingCount}</dd>
-        <p className="stat-note">{s.waitingCount > 0 ? formatMoney(s.waitingTotal, s.currency) : 'nothing held'}</p>
+        <dt>
+          <span className="stat-long">Waiting for payment</span>
+          <span className="stat-short">Unpaid</span>
+        </dt>
+        <dd className="tabular">{formatMoney(s.waitingTotal, s.currency)}</dd>
       </div>
     </dl>
   );

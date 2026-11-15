@@ -26,7 +26,7 @@ export function PasswordField({
         <label className="field-label" htmlFor={id}>
           {label}
         </label>
-        <button type="button" className="btn btn--ghost btn--sm" onClick={() => setVisible((v) => !v)} aria-pressed={visible}>
+        <button type="button" className="btn btn--link btn--sm" onClick={() => setVisible((v) => !v)} aria-pressed={visible}>
           {visible ? 'Hide' : 'Show'}
         </button>
       </div>

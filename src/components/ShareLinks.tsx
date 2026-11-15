@@ -36,7 +36,7 @@ export function ShareLinks({ shopName, channels }: { shopName: string; channels:
       {links.map((channel) => (
         <div key={channel.routingId} className="stack stack--xs">
           <span className="field-label">{CHANNEL_KIND[channel.kind]}</span>
-          <code className="card card--quiet text-sm truncate">{channel.buyerLink}</code>
+          <code className="link-chip truncate">{channel.buyerLink}</code>
           <div className="cluster cluster--sm">
             <CopyButton value={channel.buyerLink!} label="Copy link" />
             <button type="button" className="btn btn--secondary btn--sm" onClick={() => handleShare(channel.buyerLink!)}>

@@ -25,6 +25,10 @@ export function WizardShell({ stepIndex, shopName, onSignOut, children }: { step
     <div className="wizard">
       <aside className="wizard-rail">
         <Wordmark size="md" />
+        <div className="stack stack--xs">
+          <p className="text-xs text-muted">Setting up</p>
+          <strong className="truncate">{shopName ?? 'Your shop'}</strong>
+        </div>
         <ol className="wizard-steps" aria-label="Setup steps">
           {WIZARD_STEPS.map((step, i) => (
             <li key={step.id} className="wizard-step" data-state={stateOf(i)} aria-current={i === stepIndex ? 'step' : undefined}>
@@ -36,7 +40,6 @@ export function WizardShell({ stepIndex, shopName, onSignOut, children }: { step
           ))}
         </ol>
         <div className="wizard-rail-foot">
-          <strong className="truncate">{shopName ?? 'Your shop'}</strong>
           <button type="button" className="btn btn--ghost btn--sm self-start" onClick={onSignOut}>
             Sign out
           </button>
@@ -56,11 +59,11 @@ export function WizardShell({ stepIndex, shopName, onSignOut, children }: { step
               <span key={step.id} className="wizard-segment" data-state={stateOf(i)} />
             ))}
           </div>
-          <p className="text-sm text-muted">
+          <p className="wizard-progress-label">
             Step {stepIndex + 1} of {total} · {WIZARD_STEPS[stepIndex]?.title}
           </p>
         </header>
-        <main className="wizard-main stack">{children}</main>
+        <main className="wizard-main">{children}</main>
       </div>
     </div>
   );
@@ -70,7 +73,7 @@ export function StepHeading({ title, children }: { title: string; children?: Rea
   return (
     <div className="stack stack--xs">
       <h1>{title}</h1>
-      {children && <p className="text-secondary">{children}</p>}
+      {children && <p className="step-lead">{children}</p>}
     </div>
   );
 }
@@ -78,15 +81,15 @@ export function StepHeading({ title, children }: { title: string; children?: Rea
 /** Back on the left, the forward action(s) on the right. */
 export function StepFooter({ onBack, children }: { onBack?: () => void; children: ReactNode }) {
   return (
-    <div className="split">
+    <div className="split step-footer">
       {onBack ? (
-        <button type="button" className="btn btn--ghost" onClick={onBack}>
+        <button type="button" className="btn btn--ghost btn--lg step-back" onClick={onBack}>
           Back
         </button>
       ) : (
         <span />
       )}
-      <div className="cluster cluster--sm">{children}</div>
+      <div className="step-footer-actions">{children}</div>
     </div>
   );
 }

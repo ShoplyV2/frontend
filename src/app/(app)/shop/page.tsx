@@ -1,9 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboarding } from '@/lib/useOnboarding';
+import { useMediaQuery } from '@/lib/useMediaQuery';
 import { sellerMessage } from '@/lib/errorMessage';
-import { SELLER_STATUS } from '@/lib/labels';
 import { Page } from '@/components/shell/Page';
 import { useShop } from '@/components/shell/ShopProvider';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
@@ -12,9 +13,10 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { ShareLinks } from '@/components/ShareLinks';
 import { ProfileSection } from '@/components/onboarding/ProfileSection';
 import { PayoutSection } from '@/components/onboarding/PayoutSection';
-import { TelegramCard, WhatsAppCard } from '@/components/channels/ChannelCards';
+import { ChatAppsCard } from '@/components/channels/ChannelCards';
 import { AccountSection } from '@/components/shop/AccountSection';
 import { DeleteAccount } from '@/components/shop/DeleteAccount';
+import { ShopMenu } from '@/components/shop/ShopMenu';
 
 const SECTIONS = [
   ['details', 'Shop details'],
@@ -26,6 +28,10 @@ const SECTIONS = [
 
 export default function ShopPage() {
   const router = useRouter();
+  const [activeSection, setActiveSection] = useState<string>(SECTIONS[0][0]);
+  // On a phone the Shop screen is a list; one section is open at a time. Wide screens show them all.
+  const isWide = useMediaQuery('(min-width: 900px)');
+  const [phoneSection, setPhoneSection] = useState<string | null>(null);
   const toast = useToast();
   const { token, setToken, refresh: refreshShop } = useShop();
   const { profile, state, channels, loading, error, refresh: refreshSetup } = useOnboarding(token);
@@ -34,6 +40,26 @@ export default function ShopPage() {
     await Promise.all([refreshSetup(), refreshShop()]);
   };
 
+
+  // Highlight the sub-nav link for whichever section is nearest the top of the screen.
+  const ready = profile != null && state != null;
+  useEffect(() => {
+    if (!ready) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (visible) setActiveSection(visible.target.id);
+      },
+      { rootMargin: '-80px 0px -60% 0px' },
+    );
+    SECTIONS.forEach(([id]) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [ready]);
+
+  const show = (id: string) => isWide || phoneSection === id;
 
   function handleSignOut() {
     setToken(null);
@@ -46,16 +72,10 @@ export default function ShopPage() {
     router.replace('/login');
   }
 
-  const statusInfo = profile ? SELLER_STATUS[profile.status] : null;
 
   return (
     <Page width="wide">
       <div className="stack">
-        <div className="split">
-          <h1>Shop</h1>
-          {statusInfo && <span className={`badge badge--${statusInfo.tone}`}>{statusInfo.label}</span>}
-        </div>
-
         {error != null && (
           <Alert variant="danger" action={<button className="btn btn--secondary btn--sm" onClick={() => refresh()}>Try again</button>}>
             {sellerMessage(error, 'Could not load your shop.')}
@@ -68,51 +88,81 @@ export default function ShopPage() {
           profile &&
           state && (
             <div className="shop-layout">
-              <nav className="subnav" aria-label="Shop sections">
-                {SECTIONS.map(([id, label]) => (
-                  <a key={id} href={`#${id}`} className="subnav-link">
-                    {label}
-                  </a>
-                ))}
-              </nav>
-              <div className="shop-sections stack">
-                <section className="section" id="details">
-                  <p className="section-title">Shop details</p>
-                  <ProfileSection token={token} profile={profile} onSaved={refresh} />
-                </section>
+              {(isWide || phoneSection == null) && (
+                <div className="shop-side">
+                  <h1 className="shop-title">Shop</h1>
+                  <nav className="subnav" aria-label="Shop sections">
+                    {SECTIONS.map(([id, label]) => (
+                      <a key={id} href={`#${id}`} className="subnav-link" aria-current={activeSection === id ? 'true' : undefined} onClick={() => setActiveSection(id)}>
+                        {label}
+                      </a>
+                    ))}
+                  </nav>
+                </div>
+              )}
 
-                <section className="section" id="chat">
-                  <p className="section-title">Chat apps</p>
-                  <div className="stack">
-                    <TelegramCard token={token} channel={channels.find((c) => c.kind === 'telegram')} refresh={refresh} canDisconnect />
-                    <WhatsAppCard token={token} channel={channels.find((c) => c.kind === 'whatsapp')} requestedAt={profile.whatsappRequestedAt} refresh={refresh} canDisconnect />
-                  </div>
-                </section>
-
-                <section className="section" id="payments">
-                  <p className="section-title">Payments</p>
-                  <PayoutSection token={token} payoutConfigured={state.payoutConfigured} onChanged={refresh} />
-                </section>
-
-                <section className="section" id="link">
-                  <p className="section-title">Your shop link</p>
-                  <div className="card stack">
-                    <p className="text-secondary">Share this anywhere your buyers are: your Instagram bio, WhatsApp status, or a direct message.</p>
-                    <ShareLinks shopName={profile.shopName} channels={channels} />
-                  </div>
-                </section>
-
-                <section className="section" id="account">
-                  <p className="section-title">Account</p>
-                  <div className="stack">
-                    <AccountSection token={token} profile={profile} onSaved={refresh} onTokenChanged={setToken} />
-                    <button type="button" className="btn btn--secondary btn--block" onClick={handleSignOut}>
-                      Sign out
+              {!isWide && phoneSection == null ? (
+                <div className="stack">
+                  <ShopMenu profile={profile} state={state} channels={channels} onOpen={setPhoneSection} />
+                  <button type="button" className="btn btn--secondary btn--lg" onClick={handleSignOut}>
+                    Sign out
+                  </button>
+                  <DeleteAccount token={token} onDeleted={handleDeleted} compact />
+                </div>
+              ) : (
+                <div className="shop-sections stack">
+                  {!isWide && (
+                    <button type="button" className="btn btn--ghost btn--sm self-start" onClick={() => setPhoneSection(null)}>
+                      ‹ Shop
                     </button>
-                    <DeleteAccount token={token} onDeleted={handleDeleted} />
-                  </div>
-                </section>
-              </div>
+                  )}
+                  {show('details') && (
+                    <section className="section" id="details">
+                      <ProfileSection token={token} profile={profile} onSaved={refresh} showStatus />
+                    </section>
+                  )}
+
+                  {show('chat') && (
+                    <section className="section" id="chat">
+                      <ChatAppsCard token={token} channels={channels} whatsappRequestedAt={profile.whatsappRequestedAt} refresh={refresh} />
+                    </section>
+                  )}
+
+                  {show('payments') && (
+                    <section className="section" id="payments">
+                      <PayoutSection token={token} payoutConfigured={state.payoutConfigured} onChanged={refresh} />
+                    </section>
+                  )}
+
+                  {show('link') && (
+                    <section className="section" id="link">
+                      <div className="card stack">
+                        <div className="stack stack--xs">
+                          <h2>Your shop link</h2>
+                          <p className="text-secondary">Share this anywhere your buyers are.</p>
+                        </div>
+                        <ShareLinks shopName={profile.shopName} channels={channels} />
+                      </div>
+                    </section>
+                  )}
+
+                  {show('account') && (
+                    <section className="section" id="account">
+                      <div className="stack">
+                        <AccountSection token={token} profile={profile} onSaved={refresh} onTokenChanged={setToken} />
+                        {isWide && (
+                          <>
+                            <button type="button" className="btn btn--secondary btn--block" onClick={handleSignOut}>
+                              Sign out
+                            </button>
+                            <DeleteAccount token={token} onDeleted={handleDeleted} />
+                          </>
+                        )}
+                      </div>
+                    </section>
+                  )}
+                </div>
+              )}
             </div>
           )
         )}

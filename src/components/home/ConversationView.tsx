@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getConversationMessages } from '@/lib/apiClient';
-import { clockTime } from '@/lib/time';
 import type { TranscriptMessage } from '@/lib/types';
 
 /**
@@ -10,7 +9,7 @@ import type { TranscriptMessage } from '@/lib/types';
  * anything that changes when the thread may have moved on (a handoff answered, an order's status),
  * so the transcript is fetched again then.
  */
-export function ConversationView({ token, conversationId, version }: { token: string; conversationId: string; version?: string }) {
+export function ConversationView({ token, conversationId, version, highlightLast = false }: { token: string; conversationId: string; version?: string; highlightLast?: boolean }) {
   const [state, setState] = useState<{ status: 'loading' } | { status: 'error' } | { status: 'ready'; messages: TranscriptMessage[] }>({ status: 'loading' });
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -38,15 +37,18 @@ export function ConversationView({ token, conversationId, version }: { token: st
 
   return (
     <div className="chat" role="log" aria-label="Conversation with the buyer">
-      {state.messages.map((m, i) => (
-        <div key={`${m.at}-${i}`} className={`chat-row chat-row--${m.role}`}>
-          <p className="chat-bubble">
-            {m.hasMedia && <span className="chat-media">Sent a photo</span>}
-            {m.text}
-          </p>
-          <span className="chat-time">{m.role === 'assistant' ? 'Your assistant · ' : ''}{clockTime(m.at)}</span>
-        </div>
-      ))}
+      {state.messages.map((m, i) => {
+        const isPendingQuestion = highlightLast && i === state.messages.length - 1 && m.role !== 'assistant';
+        return (
+          <div key={`${m.at}-${i}`} className={`chat-row chat-row--${m.role}`}>
+            <p className={`chat-bubble${isPendingQuestion ? ' chat-bubble--ask' : ''}`}>
+              {m.role === 'assistant' && <span className="chat-who">Your assistant</span>}
+              {m.hasMedia && <span className="chat-media">Sent a photo</span>}
+              {m.text}
+            </p>
+          </div>
+        );
+      })}
       <div ref={endRef} />
     </div>
   );

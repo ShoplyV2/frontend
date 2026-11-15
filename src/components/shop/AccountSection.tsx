@@ -25,7 +25,7 @@ export function AccountSection({
 }) {
   return (
     <div className="card stack">
-      <h2>Sign-in</h2>
+      <h2>Account</h2>
       <EmailForm token={token} email={profile.email ?? ''} onSaved={onSaved} />
       <PasswordForm token={token} onTokenChanged={onTokenChanged} />
     </div>

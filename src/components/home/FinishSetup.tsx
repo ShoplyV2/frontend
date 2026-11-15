@@ -8,8 +8,9 @@ import type { ChannelSummary, OnboardingState, SellerProfile } from '@/lib/types
 
 /**
  * What a shop that is already open can still add: bank payout, and WhatsApp (which the team sets up).
- * Shows only what's still undone and disappears once there's nothing left — the setup wizard covers
- * everything required to open, so these are the optional extras.
+ * A slim strip that lists only what's still undone and disappears once there's nothing left — the
+ * setup wizard covers everything required to open, so these are the optional extras. Each link opens
+ * the real form in a sheet.
  */
 export function FinishSetup({
   token,
@@ -25,28 +26,74 @@ export function FinishSetup({
   refresh: () => Promise<void>;
 }) {
   const [payoutOpen, setPayoutOpen] = useState(false);
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
+  const [finishOpen, setFinishOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const whatsapp = channels.find((c) => c.kind === 'whatsapp');
   const payoutPending = !state.payoutConfigured;
   const whatsappPending = whatsapp?.sellerContactId == null;
+  const pending = Number(payoutPending) + Number(whatsappPending);
 
-  if (!payoutPending && !whatsappPending) return null;
+  if (pending === 0 || dismissed) return null;
 
   return (
-    <section className="section">
-      <p className="section-title">Finish setup</p>
-      <div className="stack">
-        {payoutPending && (
-          <div className="card stack stack--sm">
-            <h2>Get paid to your bank</h2>
-            <p className="text-secondary">Buyers&apos; payments only reach your bank once this is set.</p>
-            <button type="button" className="btn btn--secondary self-start" onClick={() => setPayoutOpen(true)}>
+    <>
+      <div className="finish-strip">
+        <strong>Finish setup</strong>
+        <span className="text-sm text-muted">
+          {2 - pending} of 2 done
+        </span>
+        <span className="finish-strip-links">
+          {payoutPending && (
+            <button type="button" className="btn btn--link btn--sm" onClick={() => setPayoutOpen(true)}>
               Add bank details
             </button>
-          </div>
-        )}
-        {whatsappPending && <WhatsAppCard token={token} channel={whatsapp} requestedAt={profile.whatsappRequestedAt} refresh={refresh} />}
+          )}
+          {whatsappPending && (
+            <button type="button" className="btn btn--link btn--sm" onClick={() => setWhatsappOpen(true)}>
+              {profile.whatsappRequestedAt ? 'WhatsApp requested' : 'Request WhatsApp'}
+            </button>
+          )}
+        </span>
+        <button type="button" className="btn btn--link btn--sm finish-strip-continue" onClick={() => setFinishOpen(true)}>
+          Continue
+        </button>
+        <button type="button" className="btn btn--ghost btn--icon finish-strip-dismiss" aria-label="Dismiss" onClick={() => setDismissed(true)}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
       </div>
 
+      <Sheet open={finishOpen} onClose={() => setFinishOpen(false)} title="Finish setup">
+        <h2>Finish setup</h2>
+        <div className="stack stack--sm">
+          {payoutPending && (
+            <button
+              type="button"
+              className="btn btn--secondary btn--block"
+              onClick={() => {
+                setFinishOpen(false);
+                setPayoutOpen(true);
+              }}
+            >
+              Add bank details
+            </button>
+          )}
+          {whatsappPending && (
+            <button
+              type="button"
+              className="btn btn--secondary btn--block"
+              onClick={() => {
+                setFinishOpen(false);
+                setWhatsappOpen(true);
+              }}
+            >
+              {profile.whatsappRequestedAt ? 'WhatsApp requested' : 'Request WhatsApp'}
+            </button>
+          )}
+        </div>
+      </Sheet>
       <Sheet open={payoutOpen} onClose={() => setPayoutOpen(false)} title="Bank details">
         <PayoutSection
           token={token}
@@ -57,6 +104,9 @@ export function FinishSetup({
           }}
         />
       </Sheet>
-    </section>
+      <Sheet open={whatsappOpen} onClose={() => setWhatsappOpen(false)} title="WhatsApp">
+        <WhatsAppCard token={token} channel={whatsapp} requestedAt={profile.whatsappRequestedAt} refresh={refresh} />
+      </Sheet>
+    </>
   );
 }

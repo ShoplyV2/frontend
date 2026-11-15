@@ -9,11 +9,13 @@ export function totalStock(item: CatalogItem): number {
   return item.variants.reduce((sum, v) => sum + v.stock, 0);
 }
 
-function stockSummary(item: CatalogItem): { text: string; tone: 'success' | 'warning' | 'danger' } {
-  const total = totalStock(item);
-  if (total === 0) return { text: 'Sold out', tone: 'danger' };
-  if (total <= 3) return { text: `${total} left`, tone: 'warning' };
-  return { text: `${total} in stock`, tone: 'success' };
+/** "M: 5 · L: 3": what is left, by size (with the colour when an item comes in several). */
+function stockLine(item: CatalogItem): string {
+  if (totalStock(item) === 0) return 'All sizes sold out';
+  const inStock = item.variants.filter((v) => v.stock > 0);
+  const manyColours = new Set(item.variants.map((v) => v.color.toLowerCase())).size > 1;
+  const labels = inStock.map((v) => `${manyColours ? `${v.color} ` : ''}${v.size}: ${v.stock}`);
+  return labels.length > 3 ? `${labels.slice(0, 3).join(' · ')} · +${labels.length - 3} more` : labels.join(' · ');
 }
 
 /**
@@ -22,8 +24,7 @@ function stockSummary(item: CatalogItem): { text: string; tone: 'success' | 'war
  */
 export function ProductCard({ item, onToggleAvailable }: { item: CatalogItem; onToggleAvailable: (item: CatalogItem) => void }) {
   const primaryImage = item.images.find((i) => i.isPrimary) ?? item.images[0];
-  const stock = stockSummary(item);
-  const sizes = item.variants.length;
+  const soldOut = totalStock(item) === 0;
 
   return (
     <div className="card product">
@@ -33,21 +34,19 @@ export function ProductCard({ item, onToggleAvailable }: { item: CatalogItem; on
             // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URLs, not a local/optimizable asset
             <img src={primaryImage.url} alt={item.name} loading="lazy" className="product-img" />
           ) : null}
-          {!item.visionReady && <span className="badge badge--warning product-flag">{PHOTO_PROCESSING.label}</span>}
+          {soldOut && <span className="product-flag product-flag--ink">Sold out</span>}
+          {!item.visionReady && <span className="badge badge--warning product-flag product-flag--end">{PHOTO_PROCESSING.label}</span>}
         </div>
         <div className="product-body">
-          <span className="truncate product-name">{item.name}</span>
-          <div className="split">
-            <span className="tabular">{formatMoney(item.basePrice, item.currency)}</span>
-            <span className={`badge badge--${stock.tone}`}>{stock.text}</span>
+          <div>
+            <p className="truncate product-name">{item.name}</p>
+            <p className="tabular product-price">{formatMoney(item.basePrice, item.currency)}</p>
           </div>
-          <span className="text-xs text-muted">
-            {sizes} size{sizes === 1 ? '' : 's'} &amp; colours
-          </span>
+          <p className="truncate text-xs text-muted">{stockLine(item)}</p>
         </div>
       </Link>
       <div className="product-foot">
-        <span className="text-sm text-secondary">{item.available ? 'Showing to buyers' : 'Hidden from buyers'}</span>
+        <span className="text-secondary">Available</span>
         <button type="button" role="switch" className="switch" aria-checked={item.available} aria-label={`Show ${item.name} to buyers`} onClick={() => onToggleAvailable(item)} />
       </div>
     </div>

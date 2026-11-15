@@ -33,7 +33,7 @@ export function DetailsStep({ token, profile, refresh, onBack, onNext }: { token
   }
 
   return (
-    <div className="stack">
+    <div className="step step--card step--560">
       <StepHeading title="Tell us about your shop">Your assistant uses this to describe your shop to buyers.</StepHeading>
       {error != null && <Alert variant="danger">{sellerMessage(error, 'Could not save your shop details.')}</Alert>}
       <div className="field">
@@ -46,13 +46,13 @@ export function DetailsStep({ token, profile, refresh, onBack, onNext }: { token
         <label className="field-label" htmlFor="wizard-shop-description">
           What do you sell?
         </label>
-        <textarea id="wizard-shop-description" className="textarea" rows={3} value={shopDescription} onChange={(e) => setShopDescription(e.target.value)} />
+        <textarea id="wizard-shop-description" className="textarea" rows={4} value={shopDescription} onChange={(e) => setShopDescription(e.target.value)} />
         <p className="field-hint">
           At least {MIN_SHOP_DESCRIPTION} characters. For example: &ldquo;Women&apos;s bags and shoes, imported, sizes 36–42.&rdquo; {shopDescription.trim().length} / {MIN_SHOP_DESCRIPTION}
         </p>
       </div>
       <StepFooter onBack={onBack}>
-        <button type="button" className="btn btn--primary" onClick={handleContinue} disabled={!valid || saving}>
+        <button type="button" className="btn btn--primary btn--lg" onClick={handleContinue} disabled={!valid || saving}>
           {saving ? 'Saving…' : 'Continue'}
         </button>
       </StepFooter>

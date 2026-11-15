@@ -50,6 +50,7 @@ export default function LoginPage() {
             className="input"
             type="email"
             inputMode="email"
+            placeholder="you@example.com"
             autoComplete="username"
             autoCapitalize="none"
             value={email}
@@ -58,13 +59,13 @@ export default function LoginPage() {
           />
         </div>
         <PasswordField id="login-password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" />
-        <button type="submit" className="btn btn--primary" disabled={submitting || !email.trim() || !password}>
+        <button type="submit" className="btn btn--primary btn--lg" disabled={submitting || !email.trim() || !password}>
           {submitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
 
-      <p className="text-sm">
-        New to Shoply? <Link href="/signup">Create your shop</Link>
+      <p className="auth-switch">
+        New to shoply? <Link href="/signup">Create your shop</Link>
       </p>
     </AuthLayout>
   );

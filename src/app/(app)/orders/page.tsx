@@ -1,15 +1,15 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ApiError } from '@/lib/apiClient';
 import { formatMoney } from '@/lib/format';
 import { ORDER_STATUS } from '@/lib/labels';
 import { sellerMessage } from '@/lib/errorMessage';
-import { timeAgo } from '@/lib/time';
+import { timeAgoShort } from '@/lib/time';
 import { useFeedData } from '@/lib/useFeedData';
 import { useNow } from '@/lib/useNow';
+import { useMediaQuery } from '@/lib/useMediaQuery';
 import { Page } from '@/components/shell/Page';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { useShop } from '@/components/shell/ShopProvider';
@@ -38,8 +38,10 @@ function OrdersContent() {
   const params = useSearchParams();
   const { token, refresh: refreshShop } = useShop();
   const now = useNow(30_000);
-  const { orders, handoffs, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeedData(token);
+  const { orders, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeedData(token);
   const [filter, setFilter] = useState<OrderFilter>('all');
+  // Wide screens keep the selected order beside the list; narrower ones open it in a drawer.
+  const isWide = useMediaQuery('(min-width: 1200px)');
 
   // The drawer follows ?order=<id> (the search box and links point there), and the seller can also
   // open one by clicking. A new value in the URL wins; it is read during render rather than in an
@@ -63,6 +65,7 @@ function OrdersContent() {
   const test = FILTERS.find((f) => f.key === filter)!.test;
   const shown = real.filter(test);
   const open = real.find((o) => o._id === openId) ?? null;
+  const selected = isWide ? (shown.find((o) => o._id === openId) ?? shown[0] ?? null) : null;
 
   // The sidebar's "to send" badge counts orders, so it has to hear about a change made here.
   function handlePatched(order: FeedOrder) {
@@ -90,13 +93,7 @@ function OrdersContent() {
             {pendingUpdates} new update{pendingUpdates === 1 ? '' : 's'} — Show
           </button>
         )}
-        {handoffs.length > 0 && (
-          <Alert variant="info" action={<Link href="/home" className="btn btn--secondary btn--sm">Open Home</Link>}>
-            {handoffs.length === 1 ? 'A buyer is waiting on you.' : `${handoffs.length} buyers are waiting on you.`}
-          </Alert>
-        )}
-
-        <div className="pill-group" role="group" aria-label="Filter orders">
+        <div className="pill-group pill-group--scroll" role="group" aria-label="Filter orders">
           {FILTERS.map((f) => (
             <button key={f.key} type="button" className="pill" aria-pressed={filter === f.key} onClick={() => setFilter(f.key)}>
               {f.label} <span className="pill-count">{real.filter(f.test).length}</span>
@@ -112,65 +109,93 @@ function OrdersContent() {
             <p>{real.length === 0 ? 'When a buyer orders through your chat, it shows up here.' : 'Try another filter.'}</p>
           </div>
         ) : (
-          <>
-            <table className="table orders-table">
-              <thead>
-                <tr>
-                  <th scope="col">Buyer</th>
-                  <th scope="col">Item</th>
-                  <th scope="col">Status</th>
-                  <th scope="col" className="table-num">Total</th>
-                  <th scope="col">Placed</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shown.map((o) => (
-                  <tr key={o._id} className="table-row" aria-selected={o._id === openId} onClick={() => setOpenId(o._id)}>
-                    <td>
-                      <button type="button" className="table-link" onClick={() => setOpenId(o._id)}>
-                        {buyerName(o)}
+          <div className="orders-layout">
+            <div className="orders-main">
+              <section className="order-list" aria-label="Orders">
+                <div className="order-row order-row--head" aria-hidden="true">
+                  <span />
+                  <span>Item</span>
+                  <span>Buyer</span>
+                  <span>Status</span>
+                  <span className="order-num">Amount</span>
+                  <span className="order-num">When</span>
+                </div>
+                <ul className="order-rows">
+                  {shown.map((o) => (
+                    <li key={o._id}>
+                      <button type="button" className="order-row" aria-current={o._id === (selected?._id ?? openId) ? 'true' : undefined} onClick={() => setOpenId(o._id)}>
+                        <span className="tile tile--44" aria-hidden="true">
+                          {o.item.imageUrlSnapshot ? (
+                            // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
+                            <img src={o.item.imageUrlSnapshot} alt="" />
+                          ) : (
+                            <svg viewBox="0 0 48 48" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M12 18h24l2.5 22h-29L12 18z" />
+                              <path d="M18 18a6 6 0 0 1 12 0" />
+                            </svg>
+                          )}
+                        </span>
+                        <span className="order-main">
+                          <span className="truncate order-name">{o.item.nameSnapshot}</span>
+                          <span className="truncate order-sub">
+                            {o.variant.color}, {o.variant.size} × {o.qty}
+                          </span>
+                        </span>
+                        <span className="order-buyer truncate">
+                          {buyerName(o)} · {o.delivery.area}
+                        </span>
+                        <span className="order-status">
+                          <span className={`badge badge--${ORDER_STATUS[o.status].tone}`}>{ORDER_STATUS[o.status].chip}</span>
+                        </span>
+                        <span className="order-num order-total tabular">{formatMoney(o.total, o.currency)}</span>
+                        <span className="order-num order-when">{now != null ? timeAgoShort(o.createdAt, now) : ''}</span>
                       </button>
-                      <div className="text-xs text-muted">{o.delivery.area}</div>
-                    </td>
-                    <td>
-                      {o.item.nameSnapshot}
-                      <div className="text-xs text-muted">
-                        {o.variant.color}, {o.variant.size} × {o.qty}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`badge badge--${ORDER_STATUS[o.status].tone}`}>{ORDER_STATUS[o.status].label}</span>
-                    </td>
-                    <td className="table-num tabular">{formatMoney(o.total, o.currency)}</td>
-                    <td className="text-sm text-muted">{now != null ? timeAgo(o.createdAt, now) : ''}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </li>
+                  ))}
+                </ul>
+              </section>
 
-            <ul className="order-cards">
-              {shown.map((o) => (
-                <li key={o._id}>
-                  <button type="button" className="order-card" onClick={() => setOpenId(o._id)}>
-                    <span className="split">
-                      <strong className="truncate">{o.item.nameSnapshot}</strong>
-                      <span className="tabular">{formatMoney(o.total, o.currency)}</span>
-                    </span>
-                    <span className="split">
-                      <span className="text-sm text-muted truncate">
-                        {buyerName(o)} · {o.delivery.area}
+              <ul className="order-cards">
+                {shown.map((o) => (
+                  <li key={o._id}>
+                    <button type="button" className="order-card" onClick={() => setOpenId(o._id)}>
+                      <span className="tile tile--48" aria-hidden="true">
+                        {o.item.imageUrlSnapshot ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
+                          <img src={o.item.imageUrlSnapshot} alt="" />
+                        ) : (
+                          <svg viewBox="0 0 48 48" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 18h24l2.5 22h-29L12 18z" />
+                            <path d="M18 18a6 6 0 0 1 12 0" />
+                          </svg>
+                        )}
                       </span>
-                      <span className={`badge badge--${ORDER_STATUS[o.status].tone}`}>{ORDER_STATUS[o.status].label}</span>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </>
+                      <span className="order-main">
+                        <span className="truncate order-name">{o.item.nameSnapshot}</span>
+                        <span className="truncate order-sub">
+                          {buyerName(o)} · {o.delivery.area} · {formatMoney(o.total, o.currency)}
+                        </span>
+                      </span>
+                      <span className="queue-row-side">
+                        <span className={`badge badge--${ORDER_STATUS[o.status].tone}`}>{ORDER_STATUS[o.status].chip}</span>
+                        <span className="queue-row-time tabular">{now != null ? timeAgoShort(o.createdAt, now) : ''}</span>
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {isWide && selected && token && (
+              <aside className="card orders-aside" aria-label="Order details">
+                <OrderDetail key={selected._id} order={selected} token={token} onPatched={handlePatched} />
+              </aside>
+            )}
+          </div>
         )}
       </div>
 
-      <Sheet open={open != null} onClose={close} title="Order details" drawer>
+      <Sheet open={!isWide && open != null} onClose={close} title="Order details" drawer>
         {open && token && <OrderDetail key={open._id} order={open} token={token} onPatched={handlePatched} />}
       </Sheet>
     </Page>
