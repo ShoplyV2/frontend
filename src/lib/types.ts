@@ -8,7 +8,8 @@ export type HandoffReason =
   | 'COMPLAINT'
   | 'MONEY_DISPUTE'
   | 'UNSUPPORTED_REQUEST'
-  | 'GUARDRAIL';
+  | 'GUARDRAIL'
+  | 'REPLY_FAILED';
 
 export type HandoffStatus = 'PENDING' | 'ANSWERED' | 'TIMED_OUT' | 'ESCALATED' | 'CANCELLED';
 

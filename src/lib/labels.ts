@@ -58,6 +58,7 @@ export const HANDOFF_REASON: Record<HandoffReason, string> = {
   GUARDRAIL: 'Needs your approval',
   LOW_CONFIDENCE_MATCH: 'Not sure which item they mean',
   NO_MATCH: "Couldn't find their photo in your catalog",
+  REPLY_FAILED: "Your assistant couldn't reply to this buyer",
 };
 
 // Codes returned by GET /catalog/items's `warnings` array.
