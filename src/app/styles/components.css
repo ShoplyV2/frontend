@@ -2285,3 +2285,252 @@ button.order-row:hover {
 .meter-fill--warning {
   background: var(--color-warning-fill);
 }
+
+/* ---------- admin (the team's console) ----------
+   Only what the seller app has no equivalent for. The shell, cards, badges, stats, tables and
+   pills are the same classes the seller side uses. */
+.card--flush {
+  padding: 0;
+  overflow: hidden;
+}
+.scroll-x {
+  overflow-x: auto;
+}
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.admin-search {
+  inline-size: 100%;
+  max-inline-size: 18rem;
+}
+.admin-shop-name {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+.admin-signout {
+  display: none;
+}
+@media (max-width: 899px) {
+  .admin-signout {
+    display: inline-flex;
+  }
+}
+.pill-count {
+  font-weight: var(--weight-semibold);
+  opacity: 0.7;
+}
+.bar {
+  display: block;
+  block-size: 6px;
+  min-inline-size: 64px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-sunken);
+  overflow: hidden;
+}
+.bar > i {
+  display: block;
+  block-size: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+}
+.bar--warn > i {
+  background: var(--color-warning-fill);
+}
+.bar--danger > i {
+  background: var(--color-danger-fill);
+}
+.admin-bullets {
+  list-style: disc;
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.radio-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  inline-size: 100%;
+  padding: var(--space-3) 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: start;
+  cursor: pointer;
+}
+.radio-card--on {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.radio-card-body {
+  flex: 1;
+  min-inline-size: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.radio-card-aside {
+  flex: none;
+  font-weight: var(--weight-semibold);
+}
+.radio {
+  flex: none;
+  inline-size: 18px;
+  block-size: 18px;
+  margin-block-start: 2px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border-strong);
+  display: grid;
+  place-items: center;
+}
+.radio--on {
+  border-color: var(--color-accent);
+}
+.radio--on::after {
+  content: '';
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.admin-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .admin-columns {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
+}
+.admin-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--color-border-subtle);
+}
+.admin-row:first-child {
+  padding-block-start: 0;
+}
+.admin-row:last-child {
+  padding-block-end: 0;
+  border-block-end: 0;
+}
+.admin-row-main {
+  flex: 1;
+  min-inline-size: 0;
+}
+.admin-link {
+  max-inline-size: 22rem;
+}
+.step-mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+  block-size: 24px;
+  border-radius: 50%;
+  background: var(--color-primary-fill);
+  color: var(--color-on-primary-fill);
+}
+.step-mark--open {
+  background: transparent;
+  border: 1.5px solid var(--color-border-strong);
+}
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+.crumbs a {
+  color: var(--color-text-secondary);
+}
+.admin-period {
+  inline-size: auto;
+  min-inline-size: 9rem;
+}
+.admin-usage-cell {
+  min-inline-size: 9rem;
+}
+.stats--six {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.stats--four {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.stats--six .stat + .stat,
+.stats--four .stat + .stat {
+  border-inline-start: 0;
+}
+.stats--six .stat:nth-child(even),
+.stats--four .stat:nth-child(even) {
+  border-inline-start: 1px solid var(--color-border-subtle);
+}
+.stats--six .stat:nth-child(n + 3),
+.stats--four .stat:nth-child(n + 3) {
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+@media (min-width: 900px) {
+  .stats--six {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .stats--four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .stats--six .stat + .stat,
+  .stats--four .stat + .stat {
+    border-inline-start: 1px solid var(--color-border-subtle);
+  }
+  .stats--six .stat:nth-child(n + 3),
+  .stats--four .stat:nth-child(n + 3) {
+    border-block-start: 0;
+  }
+}
+.admin-funnel-label {
+  flex: none;
+  inline-size: 9rem;
+}
+.admin-funnel-bar {
+  flex: 1;
+}
+.admin-funnel-count {
+  flex: none;
+  inline-size: 2.5rem;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.admin-card-head {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+.admin-card-head .btn {
+  flex: none;
+}
+.table td.num {
+  white-space: nowrap;
+}
+.admin-table {
+  min-inline-size: 58rem;
+}
+.admin-table td:first-child {
+  min-inline-size: 11rem;
+}
+.page-header:has(.admin-header-actions) {
+  flex-wrap: wrap;
+}
+.page-header:has(.admin-header-actions) .page-header-text {
+  flex: 1 1 16rem;
+}
