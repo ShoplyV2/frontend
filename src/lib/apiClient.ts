@@ -1,4 +1,4 @@
-import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus, TranscriptMessage } from './types';
+import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus, TranscriptMessage, UsageSummary } from './types';
 
 export const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
@@ -317,4 +317,9 @@ export function removePushSubscription(token: string, endpoint: string): Promise
 
 export function sendTestPush(token: string): Promise<{ delivered: number }> {
   return request(token, '/me/push-subscriptions/test', { method: 'POST' });
+}
+
+// This month's orders and buyer chats against the shop's plan. Shown to the seller; nothing is billed from it.
+export function getUsage(token: string): Promise<UsageSummary> {
+  return request(token, '/me/usage');
 }

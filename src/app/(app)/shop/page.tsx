@@ -16,6 +16,7 @@ import { PayoutSection } from '@/components/onboarding/PayoutSection';
 import { ChatAppsCard } from '@/components/channels/ChannelCards';
 import { AccountSection } from '@/components/shop/AccountSection';
 import { NotificationsSection } from '@/components/shop/NotificationsSection';
+import { UsageSection } from '@/components/shop/UsageSection';
 import { DeleteAccount } from '@/components/shop/DeleteAccount';
 import { ShopMenu } from '@/components/shop/ShopMenu';
 
@@ -23,6 +24,7 @@ const SECTIONS = [
   ['details', 'Shop details'],
   ['chat', 'Chat apps'],
   ['payments', 'Payments'],
+  ['usage', 'Plan and usage'],
   ['notifications', 'Notifications'],
   ['link', 'Your shop link'],
   ['account', 'Account'],
@@ -133,6 +135,12 @@ export default function ShopPage() {
                   {show('payments') && (
                     <section className="section" id="payments">
                       <PayoutSection token={token} payoutConfigured={state.payoutConfigured} onChanged={refresh} />
+                    </section>
+                  )}
+
+                  {show('usage') && (
+                    <section className="section" id="usage">
+                      <UsageSection token={token} />
                     </section>
                   )}
 
