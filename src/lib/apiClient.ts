@@ -1,4 +1,4 @@
-import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus, TranscriptMessage, UsageSummary } from './types';
+import type { AdminOverview, AdminShopDetail, AdminShopRow, AdminUsageReport, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, PlanTier, SellerProfile, SellerStatus, SuspensionReason, TranscriptMessage, UsageSummary } from './types';
 
 export const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
@@ -153,8 +153,39 @@ export function connectSellerWhatsApp(
   return request(adminToken, `/admin/sellers/${encodeURIComponent(sellerId)}/channels/whatsapp`, { method: 'POST', body: JSON.stringify(input) });
 }
 
-export function listAdminSellers(adminToken: string): Promise<{ sellers: AdminSellerSummary[] }> {
+export function listAdminSellers(adminToken: string): Promise<{ sellers: AdminShopRow[] }> {
   return request(adminToken, '/admin/sellers');
+}
+
+export function getAdminOverview(adminToken: string, period?: string): Promise<AdminOverview> {
+  return request(adminToken, `/admin/overview${period ? `?period=${encodeURIComponent(period)}` : ''}`);
+}
+
+export function getAdminShop(adminToken: string, sellerId: string): Promise<AdminShopDetail> {
+  return request(adminToken, `/admin/sellers/${encodeURIComponent(sellerId)}`);
+}
+
+export function getAdminUsage(adminToken: string, period?: string): Promise<AdminUsageReport> {
+  return request(adminToken, `/admin/usage${period ? `?period=${encodeURIComponent(period)}` : ''}`);
+}
+
+// Pauses a shop (a reason is required) or reinstates it. notifySeller also tells the seller.
+export function setAdminShopStatus(
+  adminToken: string,
+  sellerId: string,
+  input: { status: 'SUSPENDED'; reason: SuspensionReason; note?: string; notifySeller?: boolean } | { status: 'LIVE'; notifySeller?: boolean },
+): Promise<{ sellerId: string; status: SellerStatus }> {
+  return request(adminToken, `/admin/sellers/${encodeURIComponent(sellerId)}/status`, { method: 'PATCH', body: JSON.stringify(input) });
+}
+
+// Puts a shop on a plan, or back on the free trial with null.
+export function setAdminShopPlan(adminToken: string, sellerId: string, tier: PlanTier | null): Promise<{ sellerId: string; plan: PlanTier | null }> {
+  return request(adminToken, `/admin/sellers/${encodeURIComponent(sellerId)}/plan`, { method: 'PATCH', body: JSON.stringify({ tier }) });
+}
+
+// A fresh 30-minute link for the seller to link their own phone to an unlinked chat app.
+export function refreshAdminOwnerBinding(adminToken: string, sellerId: string, routingId: string): Promise<ChannelSummary> {
+  return request(adminToken, `/admin/sellers/${encodeURIComponent(sellerId)}/channels/${encodeURIComponent(routingId)}/owner-binding`, { method: 'POST' });
 }
 
 export function getOnboardingState(token: string): Promise<OnboardingState> {

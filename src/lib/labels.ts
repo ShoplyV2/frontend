@@ -1,7 +1,7 @@
 // The single vocabulary file — every enum a seller might see gets a human label here, once.
 // Nothing outside this file should render a raw backend enum, kind, or warning code.
 
-import type { ChannelKind, HandoffReason, OrderStatus, SellerStatus } from './types';
+import type { AttentionKind, ChannelKind, HandoffReason, OrderStatus, PlanTier, SellerStatus, SetupStepKey, SuspensionReason } from './types';
 
 export type Tone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'muted';
 
@@ -60,6 +60,7 @@ export const HANDOFF_REASON: Record<HandoffReason, string> = {
   NO_MATCH: "Couldn't find their photo in your catalog",
   REPLY_FAILED: "Your assistant couldn't reply to this buyer",
   TRIAL_ENDED: 'Free trial ended — a buyer needs you',
+  SHOP_PAUSED: 'Your shop is paused — a buyer needs you',
 };
 
 // Codes returned by GET /catalog/items's `warnings` array.
@@ -75,3 +76,39 @@ export const PHOTO_PROCESSING = {
 };
 
 export const STOCK_LOST_ALERT = 'Paid, but you marked this size sold out. Sort this with the buyer.';
+
+// --- Admin (the Shoply team's console) ---
+
+export const PLAN_NAME: Record<PlanTier, string> = { starter: 'Starter', growth: 'Growth', pro: 'Pro', scale: 'Scale' };
+
+// Mirrors PLANS in backend/src/config/plans.ts (and the landing page's pricing) — change them together.
+// Money is in pesewas.
+export const PLAN_DETAILS: Record<PlanTier, { priceMinor: number; orders: number; chats: number; orderOverageMinor: number; chatOverageMinor: number }> = {
+  starter: { priceMinor: 40_000, orders: 40, chats: 240, orderOverageMinor: 1_200, chatOverageMinor: 150 },
+  growth: { priceMinor: 100_000, orders: 120, chats: 720, orderOverageMinor: 1_000, chatOverageMinor: 150 },
+  pro: { priceMinor: 225_000, orders: 300, chats: 1_500, orderOverageMinor: 900, chatOverageMinor: 150 },
+  scale: { priceMinor: 420_000, orders: 600, chats: 3_000, orderOverageMinor: 840, chatOverageMinor: 150 },
+};
+
+export const SUSPENSION_REASON: Record<SuspensionReason, string> = {
+  UNPAID_INVOICE: 'Unpaid invoice',
+  POLICY_VIOLATION: 'Policy violation',
+  SELLER_REQUEST: 'Seller asked for a pause',
+  OTHER: 'Other',
+};
+
+export const SETUP_STEP: Record<SetupStepKey, string> = {
+  profile: 'Shop profile',
+  channel: 'Chat app connected',
+  owner: 'Owner linked',
+  catalog: 'Catalog added',
+  payout: 'Payout set',
+  activated: 'Live',
+};
+
+export const ATTENTION: Record<AttentionKind, { label: string; tone: Tone }> = {
+  WHATSAPP_REQUESTED: { label: 'WhatsApp requested', tone: 'info' },
+  TRIAL_ENDING: { label: 'Trial ending', tone: 'warning' },
+  STUCK_IN_SETUP: { label: 'Stuck in setup', tone: 'warning' },
+  OVER_PLAN: { label: 'Over plan', tone: 'danger' },
+};
