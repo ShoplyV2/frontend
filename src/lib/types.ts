@@ -123,17 +123,105 @@ export interface Bank {
   code: string;
 }
 
-// One row of the admin seller list — see backend/src/routes/admin.route.ts.
-export interface AdminSellerSummary {
+// --- Admin (see backend/src/services/adminShop.service.ts) ---
+
+export type SetupStepKey = 'profile' | 'channel' | 'owner' | 'catalog' | 'payout' | 'activated';
+export type SuspensionReason = 'UNPAID_INVOICE' | 'POLICY_VIOLATION' | 'SELLER_REQUEST' | 'OTHER';
+export type PlanTier = 'starter' | 'growth' | 'pro' | 'scale';
+export type AttentionKind = 'WHATSAPP_REQUESTED' | 'TRIAL_ENDING' | 'STUCK_IN_SETUP' | 'OVER_PLAN';
+
+export interface TrialCounter {
+  used: number;
+  limit: number;
+}
+
+/** One row of the admin shop list. The feedToken is only on the detail read. */
+export interface AdminShopRow {
   id: string;
   shopName: string;
   email: string | null;
   status: SellerStatus;
   active: boolean;
-  feedToken: string;
-  // Set while the seller is waiting for the team to connect their WhatsApp number.
+  createdAt: string;
   whatsappRequestedAt: string | null;
   channels: Array<{ kind: ChannelKind; displayName: string | null; active: boolean; bound: boolean }>;
+  setup: { done: number; total: number; firstOpen: SetupStepKey | null };
+  plan: PlanTier | null;
+  trial: { started: boolean; ended: boolean; daysLeft: number; orders: TrialCounter; chats: TrialCounter } | null;
+  chats: number;
+  orders: number;
+  chatsIncluded: number | null;
+  ordersIncluded: number | null;
+  lastBuyerChatAt: string | null;
+}
+
+export interface AdminShopDetail {
+  id: string;
+  shopName: string;
+  email: string | null;
+  status: SellerStatus;
+  active: boolean;
+  createdAt: string;
+  activatedAt: string | null;
+  whatsappRequestedAt: string | null;
+  suspension: { reason: SuspensionReason; note: string | null; at: string; byEmail: string } | null;
+  checklist: Array<{ key: SetupStepKey; done: boolean }>;
+  catalog: { items: number; variants: number };
+  channels: Array<ChannelSummary & { ownerBindingExpiresAt: string | null }>;
+  plan: PlanTier | null;
+  trial: (UsageTrial & { orders: TrialCounter; chats: TrialCounter }) | null;
+  usage: UsageSummary;
+  lastBuyerChatAt: string | null;
+  feedToken: string;
+}
+
+export interface AdminUsageRow {
+  sellerId: string;
+  shopName: string;
+  plan: PlanTier | null;
+  onTrial: boolean;
+  chatsIncluded: number | null;
+  ordersIncluded: number | null;
+  orders: number;
+  chats: number;
+  conversion: number | null;
+  llmCostUsd: number;
+  llmCalls: number;
+  costPerChatUsd: number | null;
+  costPerOrderUsd: number | null;
+  overageMinor: number;
+}
+
+export interface AdminUsageReport {
+  period: string;
+  sellers: AdminUsageRow[];
+  totals: { orders: number; chats: number; conversion: number | null; llmCostUsd: number; llmCalls: number; costPerChatUsd: number | null; costPerOrderUsd: number | null };
+}
+
+export interface AdminAttentionItem {
+  kind: AttentionKind;
+  shopId: string;
+  shopName: string;
+  whatsappRequestedAt: string | null;
+  createdAt: string;
+  setup: AdminShopRow['setup'];
+  trial: AdminShopRow['trial'];
+  chats: number;
+  orders: number;
+  chatsIncluded: number | null;
+  ordersIncluded: number | null;
+}
+
+export interface AdminOverview {
+  period: string;
+  shops: { total: number; live: number; onboarding: number; suspended: number };
+  totals: AdminUsageReport['totals'];
+  previous: { period: string; orders: number; chats: number };
+  attention: AdminAttentionItem[];
+  queue: Record<AttentionKind, number> & { total: number };
+  funnel: Array<{ key: 'signedUp' | 'profile' | 'channel' | 'catalog' | 'payout' | 'activated'; count: number }>;
+  topShops: AdminUsageRow[];
+  trials: { count: number; shops: Array<{ shopId: string; shopName: string; trial: NonNullable<AdminShopRow['trial']>; progress: number }> };
 }
 
 export interface CatalogImage {
