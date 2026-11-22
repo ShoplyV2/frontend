@@ -8,7 +8,9 @@ export type HandoffReason =
   | 'COMPLAINT'
   | 'MONEY_DISPUTE'
   | 'UNSUPPORTED_REQUEST'
-  | 'GUARDRAIL';
+  | 'GUARDRAIL'
+  | 'REPLY_FAILED'
+  | 'TRIAL_ENDED';
 
 export type HandoffStatus = 'PENDING' | 'ANSWERED' | 'TIMED_OUT' | 'ESCALATED' | 'CANCELLED';
 
@@ -178,4 +180,34 @@ export interface TranscriptMessage {
   at: string;
   /** The buyer attached a photo (shown as a placeholder, the image itself isn't served). */
   hasMedia: boolean;
+}
+
+// One month's use of what a plan includes (GET /me/usage). `included` is null when the shop has no
+// plan set yet — usage is counted anyway, there is just no allowance to compare it with.
+export interface UsageMetric {
+  used: number;
+  included: number | null;
+  over: number;
+  overageMinor: number;
+}
+
+export interface UsageSummary {
+  /** 'YYYY-MM' */
+  period: string;
+  currency: string;
+  plan: { tier: string; name: string; priceMinor: number } | null;
+  orders: UsageMetric;
+  chats: UsageMetric;
+  overageTotalMinor: number;
+  /** Set while the shop has no plan: the free trial and how much of it is left. Null on a plan. */
+  trial: UsageTrial | null;
+}
+
+export interface UsageTrial {
+  startedAt: string | null;
+  endsAt: string | null;
+  endedAt: string | null;
+  endReason: 'ORDERS' | 'CHATS' | 'DAYS' | null;
+  ended: boolean;
+  daysLeft: number;
 }
