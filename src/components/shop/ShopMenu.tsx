@@ -32,6 +32,7 @@ export function ShopMenu({
     { id: 'details', title: 'Shop details', note: 'Name and what you sell' },
     { id: 'chat', title: 'Chat apps', note: connected.length > 0 ? `${connected.map((c) => (c.kind === 'telegram' ? 'Telegram' : 'WhatsApp')).join(' and ')} connected` : 'Not set up yet', warn: connected.length === 0 },
     { id: 'payments', title: 'Payments', note: state.payoutConfigured ? 'Bank details saved' : 'Not set up yet', warn: !state.payoutConfigured },
+    { id: 'notifications', title: 'Notifications', note: 'Order alerts on this phone' },
     { id: 'link', title: 'Your shop link', note: link ?? 'Shows once a chat app is connected' },
     { id: 'account', title: 'Account', note: 'Email and password' },
   ];
