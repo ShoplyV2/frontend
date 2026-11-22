@@ -60,6 +60,7 @@ export const HANDOFF_REASON: Record<HandoffReason, string> = {
   NO_MATCH: "Couldn't find their photo in your catalog",
   REPLY_FAILED: "Your assistant couldn't reply to this buyer",
   TRIAL_ENDED: 'Free trial ended — a buyer needs you',
+  SHOP_PAUSED: 'Your shop is paused — a buyer needs you',
 };
 
 // Codes returned by GET /catalog/items's `warnings` array.

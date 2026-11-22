@@ -10,7 +10,8 @@ export type HandoffReason =
   | 'UNSUPPORTED_REQUEST'
   | 'GUARDRAIL'
   | 'REPLY_FAILED'
-  | 'TRIAL_ENDED';
+  | 'TRIAL_ENDED'
+  | 'SHOP_PAUSED';
 
 export type HandoffStatus = 'PENDING' | 'ANSWERED' | 'TIMED_OUT' | 'ESCALATED' | 'CANCELLED';
 
