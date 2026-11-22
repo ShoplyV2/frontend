@@ -83,6 +83,8 @@ export function useFeedData(token: string | null) {
     const onEvent = () => load(true);
     source.addEventListener('order', onEvent);
     source.addEventListener('handoff', onEvent);
+    // Sent after a gap in the live stream (the server lost its place): anything could have changed.
+    source.addEventListener('resync', onEvent);
     return () => source.close();
   }, [token, load]);
 

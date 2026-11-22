@@ -1,4 +1,4 @@
-import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus, TranscriptMessage } from './types';
+import type { AdminSellerSummary, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, SellerProfile, SellerStatus, TranscriptMessage, UsageSummary } from './types';
 
 export const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
@@ -290,4 +290,36 @@ export function deleteCatalogImage(token: string, itemId: string, r2Key: string)
 
 export function setPrimaryCatalogImage(token: string, itemId: string, r2Key: string): Promise<{ image: CatalogImage }> {
   return request(token, `/catalog/items/${itemId}/images/${encodeURIComponent(r2Key)}/primary`, { method: 'POST' });
+}
+
+// Notifications (web push). The browser needs `publicKey` to subscribe; `enabled` is false when the
+// server has no push keys configured, in which case alerts only arrive as chat messages.
+export interface PushStatus {
+  enabled: boolean;
+  publicKey: string | null;
+  subscriptions: number;
+}
+
+export function getPushStatus(token: string): Promise<PushStatus> {
+  return request(token, '/me/push');
+}
+
+export function savePushSubscription(token: string, subscription: PushSubscriptionJSON): Promise<{ subscribed: boolean }> {
+  return request(token, '/me/push-subscriptions', {
+    method: 'POST',
+    body: JSON.stringify({ endpoint: subscription.endpoint, keys: subscription.keys }),
+  });
+}
+
+export function removePushSubscription(token: string, endpoint: string): Promise<{ unsubscribed: boolean }> {
+  return request(token, '/me/push-subscriptions/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint }) });
+}
+
+export function sendTestPush(token: string): Promise<{ delivered: number }> {
+  return request(token, '/me/push-subscriptions/test', { method: 'POST' });
+}
+
+// This month's orders and buyer chats against the shop's plan. Shown to the seller; nothing is billed from it.
+export function getUsage(token: string): Promise<UsageSummary> {
+  return request(token, '/me/usage');
 }
