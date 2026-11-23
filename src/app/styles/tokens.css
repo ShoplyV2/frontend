@@ -8,11 +8,10 @@
  * (Previously --accent/--danger/--warning were single values never
  * redefined for dark mode, so #0f766e on #0a0a0a measured 2.2:1 — unreadable.)
  *
- * Dark mode is duplicated :root blocks, NOT light-dark() — that function
+ * Dark mode is a [data-theme] override block, NOT light-dark() — that function
  * needs Safari 17.5+, and sellers keep iPhones for years without updating.
  * Where light-dark() is unsupported the whole declaration is invalid and
  * custom properties fall back to nothing, so the app would render unstyled.
- * The two dark blocks below are marked KEEP IN SYNC — edit both together.
  */
 
 :root {
@@ -23,6 +22,7 @@
   --color-surface: #ffffff;
   --color-surface-sunken: #f1f1f3;
   --color-surface-hover: #f4f4f5;
+  --color-surface-faint: #fafafa;
   --color-overlay: rgb(24 24 27 / 0.45);
 
   /* text hierarchy — muted is #71717a to match the design: 4.83:1 on white, ~4.47:1 on the canvas
@@ -34,6 +34,7 @@
 
   /* borders — `border` is what inputs use (visible), `border-subtle` is cards and dividers */
   --color-border-subtle: #e4e4e7;
+  --color-divider-faint: #f0f0f2;
   --color-border: #d4d4d8;
   --color-border-strong: #b4b4bc;
 
@@ -89,7 +90,9 @@
   --color-focus: #2f54a8;
   --color-focus-halo: #ffffff;
 
+  --shadow-sm: 0 1px 2px rgb(24 24 27 / 0.08);
   --shadow-md: 0 4px 12px -2px rgb(24 24 27 / 0.08), 0 12px 24px -8px rgb(24 24 27 / 0.14);
+  --shadow-lg: 0 8px 24px rgb(24 24 27 / 0.12);
 
   /* spacing — 4px base */
   --space-0: 0;
@@ -180,10 +183,9 @@
 }
 
 /*
- * Light mode only, for now — the app does not follow system dark mode.
- * The dark palette below is kept as a manual [data-theme='dark'] override
- * only, wired up to nothing yet, so a future explicit theme toggle can turn
- * it on without redoing the palette work.
+ * Dark palette. Applied by [data-theme='dark'] on <html>, which the inline script in
+ * src/lib/theme.ts sets before first paint from the saved choice (System / Light / Dark) and
+ * keeps in step with the OS when the choice is System. There is only this one dark block.
  */
 :root[data-theme='dark'] {
   color-scheme: dark;
@@ -192,6 +194,7 @@
   --color-surface: #16191c;
   --color-surface-sunken: #101315;
   --color-surface-hover: #1f2428;
+  --color-surface-faint: #121518;
   --color-overlay: rgb(0 0 0 / 0.62);
 
   --color-text: #eceef0;
@@ -200,6 +203,7 @@
   --color-text-inverse: #0c0e10;
 
   --color-border-subtle: #1f2427;
+  --color-divider-faint: #1a1e21;
   --color-border: #2b3136;
   --color-border-strong: #414951;
 
@@ -247,5 +251,7 @@
   --color-focus: #9db6ef;
   --color-focus-halo: #0c0e10;
 
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.5);
   --shadow-md: 0 8px 24px -6px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.55);
 }

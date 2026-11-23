@@ -6,6 +6,7 @@ import { sellerMessage } from '@/lib/errorMessage';
 import { PasswordField } from '@/components/auth/PasswordField';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Alert } from '@/components/ui/Alert';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import type { SellerProfile } from '@/lib/types';
 
 const MIN_PASSWORD_LENGTH = 8; // mirrors backend/src/lib/password.ts
@@ -26,6 +27,7 @@ export function AccountSection({
   return (
     <div className="card stack">
       <h2>Account</h2>
+      <ThemeToggle />
       <EmailForm token={token} email={profile.email ?? ''} onSaved={onSaved} />
       <PasswordForm token={token} onTokenChanged={onTokenChanged} />
     </div>
