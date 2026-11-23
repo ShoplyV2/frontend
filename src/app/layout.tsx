@@ -4,6 +4,7 @@ import './globals.css';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { ConfirmProvider } from '@/components/ui/ConfirmProvider';
+import { THEME_INIT_SCRIPT } from '@/lib/theme';
 
 // Self-hosted by next/font (no runtime request to Google). Geist is the UI text face, Geist Mono is
 // for links and codes, and Outfit is used only for the "shoply" wordmark.
@@ -38,14 +39,22 @@ export const viewport: Viewport = {
   // Required for env(safe-area-inset-*) to resolve — every current iPhone
   // has a notch/Dynamic Island and a home indicator the fixed nav must clear.
   viewportFit: 'cover',
-  // Light mode only for now — see tokens.css. Revisit once a real theme toggle exists.
-  colorScheme: 'light',
-  themeColor: '#f6f6f7',
+  // The theme is chosen at runtime (System / Light / Dark) — see src/lib/theme.ts, which also
+  // keeps these theme-color tags in step with a manual choice.
+  colorScheme: 'light dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f6f6f7' },
+    { media: '(prefers-color-scheme: dark)', color: '#0c0e10' },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${outfit.variable}`}>
+    // suppressHydrationWarning: the inline script below sets data-theme on <html> before React hydrates.
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${outfit.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         <ServiceWorkerRegistration />
         <ToastProvider>
