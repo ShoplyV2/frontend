@@ -10,7 +10,7 @@ import { clockTime, dayLabel } from '@/lib/time';
 import { useConfirm } from '@/components/ui/ConfirmProvider';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Alert } from '@/components/ui/Alert';
-import { ConversationView } from '@/components/home/ConversationView';
+import { ChatPanel } from '@/components/home/ChatPanel';
 import type { FeedOrder } from '@/lib/types';
 
 /** When the order reached `status`, from its history (the payment time is stored separately and is the more exact one). */
@@ -240,7 +240,7 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
         )}
       </div>
 
-      {chatOpen && <ConversationView token={token} conversationId={order.conversationId} version={order.status} />}
+      {chatOpen && <ChatPanel token={token} conversationId={order.conversationId} />}
     </div>
   );
 }

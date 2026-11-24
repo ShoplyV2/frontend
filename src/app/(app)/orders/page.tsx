@@ -45,7 +45,8 @@ function OrdersContent() {
   const { token, profile, refresh: refreshShop } = useShop();
   const now = useNow(30_000);
   const { orders, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeed();
-  const [filter, setFilter] = useState<OrderFilter>('all');
+  // Home links here with ?filter=unpaid for "waiting for payment"; anything unrecognised means All.
+  const [filter, setFilter] = useState<OrderFilter>(() => FILTERS.find((f) => f.key === params.get('filter'))?.key ?? 'all');
   // Wide screens keep the selected order beside the list; narrower ones open it in a drawer.
   const isWide = useMediaQuery('(min-width: 1200px)');
 

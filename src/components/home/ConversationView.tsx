@@ -1,17 +1,20 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getConversationMessages } from '@/lib/apiClient';
+import { useFeed } from '@/components/shell/FeedProvider';
+import { ChatLog } from '@/components/home/ChatLog';
 import type { TranscriptMessage } from '@/lib/types';
 
 /**
- * What the buyer and your assistant have said, oldest first, newest at the bottom. `version` is
- * anything that changes when the thread may have moved on (a handoff answered, an order's status),
- * so the transcript is fetched again then.
+ * What the buyer and your assistant have said, oldest first, newest at the bottom — read-only
+ * context next to a question or an order. `version` is anything that changes when the thread may
+ * have moved on (a handoff answered, an order's status); it is also fetched again whenever the
+ * live feed reports a chat changed. To write to the buyer, see ChatPanel.
  */
 export function ConversationView({ token, conversationId, version, highlightLast = false }: { token: string; conversationId: string; version?: string; highlightLast?: boolean }) {
+  const { conversationTick } = useFeed();
   const [state, setState] = useState<{ status: 'loading' } | { status: 'error' } | { status: 'ready'; messages: TranscriptMessage[] }>({ status: 'loading' });
-  const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,31 +28,11 @@ export function ConversationView({ token, conversationId, version, highlightLast
     return () => {
       cancelled = true;
     };
-  }, [token, conversationId, version]);
-
-  useEffect(() => {
-    if (state.status === 'ready') endRef.current?.scrollIntoView({ block: 'nearest' });
-  }, [state]);
+  }, [token, conversationId, version, conversationTick]);
 
   if (state.status === 'loading') return <p className="text-sm text-muted">Loading the conversation…</p>;
   if (state.status === 'error') return <p className="text-sm text-muted">Could not load the conversation.</p>;
   if (state.messages.length === 0) return <p className="text-sm text-muted">No messages to show yet.</p>;
 
-  return (
-    <div className="chat" role="log" aria-label="Conversation with the buyer">
-      {state.messages.map((m, i) => {
-        const isPendingQuestion = highlightLast && i === state.messages.length - 1 && m.role !== 'assistant';
-        return (
-          <div key={`${m.at}-${i}`} className={`chat-row chat-row--${m.role}`}>
-            <p className={`chat-bubble${isPendingQuestion ? ' chat-bubble--ask' : ''}`}>
-              {m.role === 'assistant' && <span className="chat-who">Your assistant</span>}
-              {m.hasMedia && <span className="chat-media">Sent a photo</span>}
-              {m.text}
-            </p>
-          </div>
-        );
-      })}
-      <div ref={endRef} />
-    </div>
-  );
+  return <ChatLog messages={state.messages} highlightLast={highlightLast} />;
 }

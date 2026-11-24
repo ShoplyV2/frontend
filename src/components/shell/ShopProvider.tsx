@@ -15,8 +15,6 @@ interface ShopValue {
   channels: ChannelSummary[];
   /** Recent orders, newest first — what the sidebar badge and the search read. */
   orders: FeedOrder[];
-  /** Paid orders still to be sent: the number on the Orders tab. */
-  toSendCount: number;
   refresh: () => Promise<void>;
 }
 
@@ -80,10 +78,9 @@ export function ShopProvider({ token, setToken, children }: { token: string; set
     };
   }, [refresh]);
 
-  const toSendCount = useMemo(() => orders.filter((o) => o.status === 'PAID').length, [orders]);
   const value = useMemo<ShopValue>(
-    () => ({ token, setToken, profile, channels, orders, toSendCount, refresh }),
-    [token, setToken, profile, channels, orders, toSendCount, refresh],
+    () => ({ token, setToken, profile, channels, orders, refresh }),
+    [token, setToken, profile, channels, orders, refresh],
   );
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;

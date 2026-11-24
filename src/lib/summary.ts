@@ -4,7 +4,7 @@ export interface ShopSummary {
   currency: string;
   paidToday: number; // minor units
   paidTodayCount: number;
-  toSendCount: number;
+  ordersToday: number;
   waitingCount: number;
   waitingTotal: number; // minor units
 }
@@ -16,14 +16,14 @@ export interface ShopSummary {
  */
 export function summarize(orders: FeedOrder[], now: number): ShopSummary {
   const today = new Date(now).toDateString();
-  const summary: ShopSummary = { currency: orders[0]?.currency ?? 'GHS', paidToday: 0, paidTodayCount: 0, toSendCount: 0, waitingCount: 0, waitingTotal: 0 };
+  const summary: ShopSummary = { currency: orders[0]?.currency ?? 'GHS', paidToday: 0, paidTodayCount: 0, ordersToday: 0, waitingCount: 0, waitingTotal: 0 };
 
   for (const order of orders) {
+    if (order.status !== 'DRAFT' && new Date(order.createdAt).toDateString() === today) summary.ordersToday += 1;
     if (order.payment.paidAt && new Date(order.payment.paidAt).toDateString() === today) {
       summary.paidToday += order.payment.amountPaid ?? order.total;
       summary.paidTodayCount += 1;
     }
-    if (order.status === 'PAID') summary.toSendCount += 1;
     if (order.status === 'AWAITING_PAYMENT') {
       summary.waitingCount += 1;
       summary.waitingTotal += order.total;

@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DEFAULT_BASE_URL, getHandoffs, getOrders } from './apiClient';
-import type { FeedHandoff, FeedOrder } from './types';
+import { DEFAULT_BASE_URL, getHandoffs, getOrders, getTakenOverConversations } from './apiClient';
+import type { FeedConversation, FeedHandoff, FeedOrder } from './types';
 
 // Enough recent orders for Home's day totals and the Orders list, without paging.
 const FEED_ORDER_LIMIT = 200;
@@ -15,6 +15,7 @@ const RECONNECT_MAX_MS = 30_000;
 interface FeedSnapshot {
   orders: FeedOrder[];
   handoffs: FeedHandoff[];
+  conversations: FeedConversation[];
 }
 
 // A refetch triggered by a live event applies immediately only when it's safe to move cards
@@ -28,7 +29,7 @@ function safeToApplyNow(): boolean {
 }
 
 /**
- * The seller's orders and assistant questions, kept live.
+ * The seller's orders, assistant questions and taken-over chats, kept live.
  *
  * Live updates come from a server-sent-events stream that only says "something changed"; each
  * event triggers a refetch. The stream is not trusted to stay up on its own:
@@ -43,6 +44,9 @@ function safeToApplyNow(): boolean {
 export function useFeedData(token: string | null) {
   const [orders, setOrders] = useState<FeedOrder[]>([]);
   const [handoffs, setHandoffs] = useState<FeedHandoff[]>([]);
+  const [conversations, setConversations] = useState<FeedConversation[]>([]);
+  // Goes up on every live "a chat changed" event, so an open chat view knows to fetch its messages again.
+  const [conversationTick, setConversationTick] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   // The raw error, not a pre-extracted message — sellerMessage() needs the ApiError's `code`.
@@ -58,6 +62,7 @@ export function useFeedData(token: string | null) {
     if (!snapshot) return;
     setOrders(snapshot.orders);
     setHandoffs(snapshot.handoffs);
+    setConversations(snapshot.conversations);
     pendingSnapshot.current = null;
     setPendingUpdates(0);
   }, []);
@@ -72,9 +77,13 @@ export function useFeedData(token: string | null) {
       if (background) setRefreshing(true);
       else setLoading(true);
       try {
-        const [ordersRes, handoffsRes] = await Promise.all([getOrders(token, undefined, FEED_ORDER_LIMIT), getHandoffs(token)]);
+        const [ordersRes, handoffsRes, conversationsRes] = await Promise.all([
+          getOrders(token, undefined, FEED_ORDER_LIMIT),
+          getHandoffs(token),
+          getTakenOverConversations(token),
+        ]);
         if (mine !== requestSeq.current) return; // a newer request has started; its answer wins
-        const snapshot: FeedSnapshot = { orders: ordersRes.orders, handoffs: handoffsRes.handoffs };
+        const snapshot: FeedSnapshot = { orders: ordersRes.orders, handoffs: handoffsRes.handoffs, conversations: conversationsRes.conversations };
         if (background && !safeToApplyNow()) {
           pendingSnapshot.current = snapshot;
           setPendingUpdates((n) => n + 1);
@@ -83,6 +92,7 @@ export function useFeedData(token: string | null) {
           setPendingUpdates(0);
           setOrders(snapshot.orders);
           setHandoffs(snapshot.handoffs);
+          setConversations(snapshot.conversations);
         }
         loadedOnce.current = true;
         setError(null);
@@ -126,6 +136,11 @@ export function useFeedData(token: string | null) {
       source = next;
       next.addEventListener('order', onEvent);
       next.addEventListener('handoff', onEvent);
+      // A chat was taken over, handed back, or a message was added to one you are handling.
+      next.addEventListener('conversation', () => {
+        setConversationTick((n) => n + 1);
+        load(true);
+      });
       // Sent after a gap in the live stream (the server lost its place): anything could have changed.
       next.addEventListener('resync', onEvent);
       next.onopen = () => {
@@ -188,7 +203,7 @@ export function useFeedData(token: string | null) {
     setOrders((current) => current.map((o) => (o._id === order._id ? order : o)));
   }, []);
 
-  return { orders, handoffs, loading, refreshing, error, pendingUpdates, applyPending, refresh, patchOrder };
+  return { orders, handoffs, conversations, conversationTick, loading, refreshing, error, pendingUpdates, applyPending, refresh, patchOrder };
 }
 
 export type FeedData = ReturnType<typeof useFeedData>;

@@ -268,9 +268,26 @@ export interface NewVariantInput {
   sku?: string | null;
 }
 
+/** Who is answering a buyer: the assistant (AUTO), waiting on a question for you, or you (SELLER_TAKEOVER). */
+export type ConversationMode = 'AUTO' | 'STALLED_AWAITING_SELLER' | 'SELLER_TAKEOVER';
+
+/** A chat you have taken over, as GET /feed/conversations lists it. */
+export interface FeedConversation {
+  _id: string;
+  channel: 'whatsapp' | 'telegram';
+  buyerName: string;
+  area: string | null;
+  takeoverStartedAt: string | null;
+  lastSellerMessageAt: string | null;
+  lastBuyerMessage: { text: string; at: string } | null;
+  /** You owe the buyer a reply: you haven't written to them yet, or they wrote after you did. */
+  waitingOnSeller: boolean;
+}
+
 /** One line of a buyer–shop chat, as GET /feed/conversations/:id/messages returns it. */
 export interface TranscriptMessage {
-  role: 'buyer' | 'assistant';
+  /** 'seller' is something you typed yourself while you had the chat taken over. */
+  role: 'buyer' | 'assistant' | 'seller';
   text: string;
   at: string;
   /** The buyer attached a photo (shown as a placeholder, the image itself isn't served). */

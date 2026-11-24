@@ -1517,6 +1517,58 @@
 .queue-row[aria-current='true'] {
   background: var(--color-surface-hover);
 }
+/* Home's inbox: each row is the (clickable) summary plus the one thing to do about it. */
+.inbox-section {
+  margin: 0;
+  padding: 10px 14px 6px;
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
+  background: var(--color-surface-hover);
+  border-block-start: 1px solid var(--color-border-subtle);
+}
+.inbox-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding-inline-end: 12px;
+}
+.inbox-row .queue-row {
+  flex: 1;
+  min-inline-size: 0;
+}
+.inbox-row-action {
+  flex: none;
+}
+.queue-row-sub--strong {
+  color: var(--color-accent);
+  font-weight: var(--weight-medium);
+}
+.inbox-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: 52px;
+  padding: 0 14px;
+  border-block-start: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-hover);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+.inbox-foot-link {
+  margin-inline-start: auto;
+  font-weight: var(--weight-medium);
+  color: var(--color-accent);
+}
+.stat-link {
+  color: inherit;
+  text-decoration: none;
+}
+.stat-link:hover {
+  text-decoration: underline;
+}
 .queue-row-main {
   display: flex;
   flex-direction: column;
@@ -1620,7 +1672,8 @@
 .chat-row--user {
   align-self: flex-start;
 }
-.chat-row--assistant {
+.chat-row--assistant,
+.chat-row--seller {
   align-self: flex-end;
 }
 .chat-bubble {
@@ -1635,6 +1688,23 @@
 .chat-row--assistant .chat-bubble {
   background: var(--color-surface);
   border: 1px solid var(--color-border-subtle);
+}
+.chat-row--seller .chat-bubble {
+  background: var(--color-accent-tint);
+  border: 1px solid var(--color-border-subtle);
+}
+.chat-control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+.chat-control p {
+  margin: 0;
+  flex: 1 1 16rem;
 }
 .chat-bubble--ask {
   background: var(--color-accent-tint);

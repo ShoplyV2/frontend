@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { buildInbox } from '@/lib/queue';
 import { useFeedData, type FeedData } from '@/lib/useFeedData';
 import { useShop } from './ShopProvider';
 
@@ -11,6 +12,12 @@ export function useFeed(): FeedData {
   const value = useContext(FeedContext);
   if (!value) throw new Error('useFeed must be used inside the signed-in app (the (app) layout).');
   return value;
+}
+
+/** How many things are waiting on the seller right now — the number on Home's tab. */
+export function useNeedsYouCount(): number {
+  const { orders, handoffs, conversations } = useFeed();
+  return useMemo(() => buildInbox(orders, handoffs, conversations).length, [orders, handoffs, conversations]);
 }
 
 /**
