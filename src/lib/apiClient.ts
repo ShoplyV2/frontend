@@ -1,4 +1,4 @@
-import type { AdminOverview, AdminShopDetail, AdminShopRow, AdminUsageReport, Bank, CatalogImage, CatalogItem, ChannelSummary, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, PlanTier, SellerProfile, SellerStatus, SuspensionReason, TranscriptMessage, UsageSummary } from './types';
+import type { AdminOverview, AdminShopDetail, AdminShopRow, AdminUsageReport, Bank, CatalogImage, CatalogItem, ChannelSummary, ConversationMode, FeedConversation, FeedHandoff, FeedOrder, NewVariantInput, OnboardingState, PlanTier, SellerProfile, SellerStatus, SuspensionReason, TranscriptMessage, UsageSummary } from './types';
 
 export const DEFAULT_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
@@ -65,8 +65,29 @@ export function getOrders(token: string, status?: string, limit?: number): Promi
   return request(token, `/feed/orders${query}`);
 }
 
-export function getConversationMessages(token: string, conversationId: string): Promise<{ messages: TranscriptMessage[] }> {
+export function getConversationMessages(token: string, conversationId: string): Promise<{ messages: TranscriptMessage[]; mode: ConversationMode }> {
   return request(token, `/feed/conversations/${encodeURIComponent(conversationId)}/messages`);
+}
+
+/** The chats you have taken over. */
+export function getTakenOverConversations(token: string): Promise<{ conversations: FeedConversation[] }> {
+  return request(token, '/feed/conversations');
+}
+
+export function takeoverConversation(token: string, conversationId: string): Promise<{ outcome: string }> {
+  return request(token, `/feed/conversations/${encodeURIComponent(conversationId)}/takeover`, { method: 'POST' });
+}
+
+export function handBackConversation(token: string, conversationId: string): Promise<{ outcome: string }> {
+  return request(token, `/feed/conversations/${encodeURIComponent(conversationId)}/handback`, { method: 'POST' });
+}
+
+/** Your own message to the buyer, while you have the chat taken over. */
+export function sendSellerMessage(token: string, conversationId: string, text: string): Promise<{ outcome: string }> {
+  return request(token, `/feed/conversations/${encodeURIComponent(conversationId)}/messages`, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  });
 }
 
 export function getHandoffs(token: string, status?: string): Promise<{ handoffs: FeedHandoff[] }> {
@@ -81,12 +102,12 @@ export function answerHandoff(token: string, handoffId: string, reply: string): 
   });
 }
 
-export function takeoverHandoff(token: string, handoffId: string): Promise<{ outcome: string }> {
-  return request(token, `/feed/handoffs/${handoffId}/takeover`, { method: 'POST' });
-}
-
-export function markSoldOut(token: string, orderId: string): Promise<{ outcome: string }> {
-  return request(token, `/feed/orders/${orderId}/sold-out`, { method: 'POST' });
+// `line` says which item of a several-item order to hide; a one-item order needs none.
+export function markSoldOut(token: string, orderId: string, line?: number): Promise<{ outcome: string }> {
+  return request(token, `/feed/orders/${orderId}/sold-out`, {
+    method: 'POST',
+    ...(line === undefined ? {} : { body: JSON.stringify({ line }) }),
+  });
 }
 
 export function dispatchOrder(token: string, orderId: string): Promise<{ order: FeedOrder }> {

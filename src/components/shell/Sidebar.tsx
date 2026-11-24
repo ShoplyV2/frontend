@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Wordmark } from '@/components/ui/Wordmark';
 import { CHANNEL_KIND, SELLER_STATUS } from '@/lib/labels';
 import type { ChannelKind, ChannelSummary, SellerProfile } from '@/lib/types';
+import { useNeedsYouCount } from './FeedProvider';
 import { useShop } from './ShopProvider';
 import { NAV, NavIcon, isNavActive } from './navItems';
 
@@ -20,7 +21,8 @@ function chatAppStatus(kind: ChannelKind, channels: ChannelSummary[], profile: S
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, channels, toSendCount, setToken } = useShop();
+  const { profile, channels, setToken } = useShop();
+  const needsYou = useNeedsYouCount();
   const status = profile ? SELLER_STATUS[profile.status] : null;
 
   return (
@@ -34,9 +36,9 @@ export function Sidebar() {
           <Link key={item.key} href={item.href} className="navlink" aria-current={isNavActive(pathname, item.href) ? 'page' : undefined}>
             <NavIcon path={item.icon} />
             <span>{item.label}</span>
-            {item.key === 'orders' && toSendCount > 0 && (
-              <span className="navlink-badge" aria-label={`${toSendCount} to send`}>
-                {toSendCount}
+            {item.key === 'home' && needsYou > 0 && (
+              <span className="navlink-badge" aria-label={`${needsYou} waiting on you`}>
+                {needsYou}
               </span>
             )}
           </Link>

@@ -6,13 +6,14 @@ import { ApiError } from '@/lib/apiClient';
 import { formatMoney } from '@/lib/format';
 import { ORDER_STATUS } from '@/lib/labels';
 import { sellerMessage } from '@/lib/errorMessage';
+import { orderPhoto, orderSummary, orderTitle } from '@/lib/orderLines';
 import { timeAgoShort } from '@/lib/time';
-import { useFeedData } from '@/lib/useFeedData';
 import { useNow } from '@/lib/useNow';
 import { useMediaQuery } from '@/lib/useMediaQuery';
 import { Page } from '@/components/shell/Page';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { useShop } from '@/components/shell/ShopProvider';
+import { useFeed } from '@/components/shell/FeedProvider';
 import { OrderDetail } from '@/components/orders/OrderDetail';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
@@ -41,10 +42,11 @@ function buyerWhere(o: FeedOrder): string {
 function OrdersContent() {
   const router = useRouter();
   const params = useSearchParams();
-  const { token, refresh: refreshShop } = useShop();
+  const { token, profile, refresh: refreshShop } = useShop();
   const now = useNow(30_000);
-  const { orders, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeedData(token);
-  const [filter, setFilter] = useState<OrderFilter>('all');
+  const { orders, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeed();
+  // Home links here with ?filter=unpaid for "waiting for payment"; anything unrecognised means All.
+  const [filter, setFilter] = useState<OrderFilter>(() => FILTERS.find((f) => f.key === params.get('filter'))?.key ?? 'all');
   // Wide screens keep the selected order beside the list; narrower ones open it in a drawer.
   const isWide = useMediaQuery('(min-width: 1200px)');
 
@@ -60,8 +62,9 @@ function OrdersContent() {
   }
 
   // The orders API only serves an open shop and answers 403 to anyone else. That's a seller who
-  // hasn't finished setup — send them there rather than showing an error.
-  const shopNotOpen = error instanceof ApiError && error.code === 'FORBIDDEN';
+  // hasn't finished setup — send them there rather than showing an error. (The shared feed doesn't
+  // even ask until the profile says the shop is open, so the profile is the usual way to know.)
+  const shopNotOpen = (error instanceof ApiError && error.code === 'FORBIDDEN') || (profile != null && profile.status !== 'LIVE');
   useEffect(() => {
     if (shopNotOpen) router.replace('/welcome');
   }, [shopNotOpen, router]);
@@ -130,9 +133,9 @@ function OrdersContent() {
                     <li key={o._id}>
                       <button type="button" className="order-row" aria-current={o._id === (selected?._id ?? openId) ? 'true' : undefined} onClick={() => setOpenId(o._id)}>
                         <span className="tile tile--44" aria-hidden="true">
-                          {o.item.imageUrlSnapshot ? (
+                          {orderPhoto(o) ? (
                             // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
-                            <img src={o.item.imageUrlSnapshot} alt="" />
+                            <img src={orderPhoto(o) ?? ''} alt="" />
                           ) : (
                             <svg viewBox="0 0 48 48" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M12 18h24l2.5 22h-29L12 18z" />
@@ -141,9 +144,9 @@ function OrdersContent() {
                           )}
                         </span>
                         <span className="order-main">
-                          <span className="truncate order-name">{o.item.nameSnapshot}</span>
+                          <span className="truncate order-name">{orderTitle(o)}</span>
                           <span className="truncate order-sub">
-                            {o.variant.color}, {o.variant.size} × {o.qty}
+                            {orderSummary(o)}
                           </span>
                         </span>
                         <span className="order-buyer truncate">{buyerWhere(o)}</span>
@@ -163,9 +166,9 @@ function OrdersContent() {
                   <li key={o._id}>
                     <button type="button" className="order-card" onClick={() => setOpenId(o._id)}>
                       <span className="tile tile--48" aria-hidden="true">
-                        {o.item.imageUrlSnapshot ? (
+                        {orderPhoto(o) ? (
                           // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
-                          <img src={o.item.imageUrlSnapshot} alt="" />
+                          <img src={orderPhoto(o) ?? ''} alt="" />
                         ) : (
                           <svg viewBox="0 0 48 48" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 18h24l2.5 22h-29L12 18z" />
@@ -174,7 +177,7 @@ function OrdersContent() {
                         )}
                       </span>
                       <span className="order-main">
-                        <span className="truncate order-name">{o.item.nameSnapshot}</span>
+                        <span className="truncate order-name">{orderTitle(o)}</span>
                         <span className="truncate order-sub">
                           {buyerWhere(o)} · {formatMoney(o.total, o.currency)}
                         </span>

@@ -1,46 +1,63 @@
 import { sortByPriority } from './orderPriority';
-import type { FeedHandoff, FeedOrder } from './types';
+import type { FeedConversation, FeedHandoff, FeedOrder } from './types';
 
 /**
- * Home's work queue: everything the seller has to look at or act on, in one list. A question the
- * assistant couldn't answer ("needs you") outranks any order, since a buyer is waiting on it; orders
- * follow in the existing priority order (stock-lost, paid, unpaid, on the way).
+ * Home's inbox: only what needs the seller right now. Three kinds of thing, each with something to
+ * do, and each leaves the list once it has been dealt with:
+ * - a question your assistant couldn't answer (a buyer is waiting);
+ * - a chat you have taken over (you are the one answering that buyer);
+ * - a paid order still to be sent.
+ *
+ * Orders that need nothing from the seller (waiting for the buyer to pay, already on the way, done)
+ * are not here — they live in Orders, and Home only says how many there are.
  */
-export type QueueItem =
+export type InboxItem =
   | { key: string; kind: 'question'; handoff: FeedHandoff; at: string }
-  | { key: string; kind: 'order'; order: FeedOrder; at: string };
+  | { key: string; kind: 'chat'; conversation: FeedConversation; at: string }
+  | { key: string; kind: 'parcel'; order: FeedOrder; at: string };
 
-export type QueueFilter = 'all' | 'needs' | 'send';
+export type InboxKind = InboxItem['kind'];
 
-// Orders that are finished or never became real have nothing left to do.
-const DONE: ReadonlySet<FeedOrder['status']> = new Set(['DELIVERED', 'CANCELLED', 'EXPIRED', 'DRAFT']);
+/** The sections Home shows, in order — a buyer waiting on an answer comes before a parcel. */
+export const INBOX_SECTIONS: Array<{ kind: InboxKind; title: string }> = [
+  { kind: 'question', title: 'Questions from buyers' },
+  { kind: 'chat', title: "Chats you've taken over" },
+  { kind: 'parcel', title: 'Parcels to send' },
+];
 
-export function buildQueue(orders: FeedOrder[], handoffs: FeedHandoff[]): QueueItem[] {
-  const questions: QueueItem[] = [...handoffs]
-    .sort((a, b) => new Date(b.askedAt).getTime() - new Date(a.askedAt).getTime())
+function time(iso: string): number {
+  return new Date(iso).getTime();
+}
+
+export function buildInbox(orders: FeedOrder[], handoffs: FeedHandoff[], conversations: FeedConversation[]): InboxItem[] {
+  const questions: InboxItem[] = [...handoffs]
+    .sort((a, b) => time(b.askedAt) - time(a.askedAt))
     .map((handoff) => ({ key: `q:${handoff._id}`, kind: 'question', handoff, at: handoff.askedAt }));
 
-  const active: QueueItem[] = sortByPriority(orders.filter((o) => !DONE.has(o.status))).map((order) => ({
+  // A buyer who wrote after you last did is waiting on you, so those chats come first.
+  const chats: InboxItem[] = [...conversations]
+    .sort((a, b) => Number(b.waitingOnSeller) - Number(a.waitingOnSeller) || time(chatAt(b)) - time(chatAt(a)))
+    .map((conversation) => ({ key: `c:${conversation._id}`, kind: 'chat', conversation, at: chatAt(conversation) }));
+
+  // An order paid for stock that turned out to be gone ranks first (see orderPriority).
+  const parcels: InboxItem[] = sortByPriority(orders.filter((o) => o.status === 'PAID')).map((order) => ({
     key: `o:${order._id}`,
-    kind: 'order',
+    kind: 'parcel',
     order,
     at: order.createdAt,
   }));
 
-  return [...questions, ...active];
+  return [...questions, ...chats, ...parcels];
 }
 
-/** "Needs you": a waiting question, or a paid order whose stock is gone. "To send": paid, not yet sent. */
-export function isNeedsYou(item: QueueItem): boolean {
-  return item.kind === 'question' || item.order.fulfillmentRisk === 'STOCK_LOST';
+function chatAt(conversation: FeedConversation): string {
+  return conversation.lastBuyerMessage?.at ?? conversation.takeoverStartedAt ?? new Date(0).toISOString();
 }
 
-export function isToSend(item: QueueItem): boolean {
-  return item.kind === 'order' && item.order.status === 'PAID';
-}
-
-export function filterQueue(queue: QueueItem[], filter: QueueFilter): QueueItem[] {
-  if (filter === 'needs') return queue.filter(isNeedsYou);
-  if (filter === 'send') return queue.filter(isToSend);
-  return queue;
+/** What Home says about the orders that are not its business: buyers yet to pay, and parcels already sent. */
+export function waitingOnOthers(orders: FeedOrder[]): { unpaid: number; onTheWay: number } {
+  return {
+    unpaid: orders.filter((o) => o.status === 'AWAITING_PAYMENT').length,
+    onTheWay: orders.filter((o) => o.status === 'DISPATCHED').length,
+  };
 }

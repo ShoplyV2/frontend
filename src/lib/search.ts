@@ -1,3 +1,4 @@
+import { orderSearchTerms, orderTitle } from './orderLines';
 import { formatMoney } from './format';
 import { ORDER_STATUS, type Tone } from './labels';
 import type { CatalogItem, FeedOrder } from './types';
@@ -32,7 +33,7 @@ export function searchShop(query: string, orders: FeedOrder[], items: CatalogIte
     .filter((o) => o.status !== 'DRAFT')
     .filter((o) =>
       matches(
-        [o.item.nameSnapshot, o.variant.color, o.variant.size, o.delivery.name, o.delivery.area, o.delivery.address, o.delivery.phone, o.buyer.name, o.buyer.phone]
+        [...orderSearchTerms(o), o.delivery.name, o.delivery.area, o.delivery.address, o.delivery.phone, o.buyer.name, o.buyer.phone]
           .filter(Boolean)
           .join(' '),
         terms,
@@ -42,7 +43,7 @@ export function searchShop(query: string, orders: FeedOrder[], items: CatalogIte
     .map((o) => ({
       id: o._id,
       kind: 'order' as const,
-      title: o.item.nameSnapshot,
+      title: orderTitle(o),
       subtitle: [o.delivery.name || o.buyer.name || 'Buyer', o.delivery.area].filter(Boolean).join(' · '),
       badge: { label: ORDER_STATUS[o.status].label, tone: ORDER_STATUS[o.status].tone },
       href: `/orders?order=${o._id}`,

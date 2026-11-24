@@ -5,11 +5,12 @@ import { dispatchOrder, deliverOrder, markSoldOut } from '@/lib/apiClient';
 import { formatMoney, mapsHref, telHref } from '@/lib/format';
 import { sellerMessage } from '@/lib/errorMessage';
 import { ORDER_STATUS, STOCK_LOST_ALERT, paymentChannelLabel } from '@/lib/labels';
+import { lineSummary, orderPhoto, orderSummary, orderTitle } from '@/lib/orderLines';
 import { clockTime, dayLabel } from '@/lib/time';
 import { useConfirm } from '@/components/ui/ConfirmProvider';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Alert } from '@/components/ui/Alert';
-import { ConversationView } from '@/components/home/ConversationView';
+import { ChatPanel } from '@/components/home/ChatPanel';
 import type { FeedOrder } from '@/lib/types';
 
 /** When the order reached `status`, from its history (the payment time is stored separately and is the more exact one). */
@@ -67,8 +68,14 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
     if (ok) await run(() => deliverOrder(token, order._id));
   }
 
-  async function handleHideSize() {
-    const label = `${order.variant.color} · ${order.variant.size}`;
+  // An order can hold several items; "hide this size" is about one of them, so it names which.
+  const hasSeveralItems = order.lines.length > 1;
+  const canHideSize = order.status === 'AWAITING_PAYMENT' || order.status === 'PAID';
+
+  async function handleHideSize(lineIndex: number) {
+    const line = order.lines[lineIndex];
+    if (!line) return;
+    const label = `${line.variant.color} · ${line.variant.size}`;
     const ok = await confirm({
       title: 'Hide this size from buyers?',
       body: `"${label}" will show as sold out across your whole catalog. This order stays open — talk to the buyer about it.`,
@@ -79,7 +86,7 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
     setBusy(true);
     setActionError(null);
     try {
-      await markSoldOut(token, order._id);
+      await markSoldOut(token, order._id, hasSeveralItems ? lineIndex : undefined);
       toast({ tone: 'success', text: `"${label}" is now sold out.` });
     } catch (err) {
       setActionError(sellerMessage(err, 'Could not hide that size.'));
@@ -88,7 +95,7 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
     }
   }
 
-  const photo = order.item.imageUrlSnapshot;
+  const photo = orderPhoto(order);
   const pin = order.delivery.location ?? null;
 
   return (
@@ -106,16 +113,44 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
           )}
         </span>
         <div className="order-head-text">
-          <h2>{order.item.nameSnapshot}</h2>
-          <p className="text-sm text-muted">
-            {order.variant.color}, {order.variant.size} × {order.qty}
-          </p>
+          <h2>{orderTitle(order)}</h2>
+          <p className="text-sm text-muted">{orderSummary(order)}</p>
         </div>
         <div className="order-head-side">
           <p className="order-amount tabular">{formatMoney(order.total, order.currency)}</p>
           <span className={`badge badge--${statusInfo.tone}`}>{statusInfo.label}</span>
         </div>
       </div>
+
+      {hasSeveralItems && (
+        <ul className="order-lines" aria-label="Items in this order">
+          {order.lines.map((line, index) => (
+            <li key={line.variant.variantId} className="order-line">
+              <span className="tile tile--40" aria-hidden="true">
+                {line.item.imageUrlSnapshot ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
+                  <img src={line.item.imageUrlSnapshot} alt="" />
+                ) : (
+                  <svg viewBox="0 0 48 48" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 18h24l2.5 22h-29L12 18z" />
+                    <path d="M18 18a6 6 0 0 1 12 0" />
+                  </svg>
+                )}
+              </span>
+              <span className="order-line-main">
+                <span className="truncate order-line-name">{line.item.nameSnapshot}</span>
+                <span className="truncate text-sm text-muted">{lineSummary(line)}</span>
+                {canHideSize && (
+                  <button type="button" className="btn btn--quiet btn--sm order-line-hide" disabled={busy} onClick={() => handleHideSize(index)}>
+                    Hide this size
+                  </button>
+                )}
+              </span>
+              <span className="tabular order-line-total">{formatMoney(line.lineTotal, order.currency)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {order.fulfillmentRisk === 'STOCK_LOST' && <Alert variant="danger">{STOCK_LOST_ALERT}</Alert>}
       {order.status === 'AWAITING_PAYMENT' && <p className="note note--warning">{statusInfo.hint}</p>}
@@ -198,14 +233,14 @@ export function OrderDetail({ order, token, onPatched }: { order: FeedOrder; tok
         <button type="button" className="btn btn--secondary btn--block" aria-expanded={chatOpen} onClick={() => setChatOpen((o) => !o)}>
           {chatOpen ? 'Hide chat with this buyer' : 'Show chat with this buyer'}
         </button>
-        {(order.status === 'AWAITING_PAYMENT' || order.status === 'PAID') && (
-          <button type="button" className="btn btn--quiet" disabled={busy} onClick={handleHideSize}>
+        {canHideSize && !hasSeveralItems && (
+          <button type="button" className="btn btn--quiet" disabled={busy} onClick={() => handleHideSize(0)}>
             Hide this size
           </button>
         )}
       </div>
 
-      {chatOpen && <ConversationView token={token} conversationId={order.conversationId} version={order.status} />}
+      {chatOpen && <ChatPanel token={token} conversationId={order.conversationId} />}
     </div>
   );
 }

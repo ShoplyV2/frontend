@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { answerHandoff, takeoverHandoff } from '@/lib/apiClient';
+import { answerHandoff, takeoverConversation } from '@/lib/apiClient';
 import { sellerMessage } from '@/lib/errorMessage';
 import { HANDOFF_REASON } from '@/lib/labels';
 import { timeLeft } from '@/lib/time';
@@ -11,7 +11,7 @@ import { Alert } from '@/components/ui/Alert';
 import { ConversationView } from '@/components/home/ConversationView';
 import type { FeedHandoff } from '@/lib/types';
 
-export function HandoffCard({ handoff, token, onAction }: { handoff: FeedHandoff; token: string; onAction: () => void }) {
+export function HandoffCard({ handoff, token, onAction, onTakenOver }: { handoff: FeedHandoff; token: string; onAction: () => void; onTakenOver?: (conversationId: string) => void }) {
   const now = useNow(1000);
   const confirm = useConfirm();
   const [reply, setReply] = useState(handoff.suggestedReply ?? '');
@@ -37,20 +37,16 @@ export function HandoffCard({ handoff, token, onAction }: { handoff: FeedHandoff
   async function handleTakeover() {
     const ok = await confirm({
       title: 'Take this chat over yourself?',
-      body: (
-        <>
-          Your assistant will stop replying to this buyer. Message them from your own WhatsApp or Telegram. When you&apos;re done, send{' '}
-          <strong>HANDBACK {handoff.shortCode}</strong> in your chat app and your assistant takes over again.
-        </>
-      ),
+      body: 'Your assistant will stop replying to this buyer, and you can write to them right here. You can hand the chat back whenever you like.',
       confirmLabel: "Yes, I'll handle it",
     });
     if (!ok) return;
     setBusy(true);
     setActionError(null);
     try {
-      await takeoverHandoff(token, handoff._id);
+      await takeoverConversation(token, handoff.conversationId);
       onAction();
+      onTakenOver?.(handoff.conversationId);
     } catch (err) {
       setActionError(sellerMessage(err, 'Could not take over that chat.'));
       setBusy(false);
@@ -87,7 +83,7 @@ export function HandoffCard({ handoff, token, onAction }: { handoff: FeedHandoff
           )}
         </label>
         <textarea id={`reply-${handoff._id}`} className="textarea" rows={3} value={reply} onChange={(event) => setReply(event.target.value)} placeholder="Type your reply to the buyer" />
-        {handoff.shortCode && <p className="field-hint">You can also answer from WhatsApp: reply &lsquo;{handoff.shortCode} your message&rsquo;.</p>}
+        {handoff.shortCode && <p className="field-hint">You can also answer from your chat app: reply &lsquo;{handoff.shortCode} your message&rsquo;.</p>}
       </div>
 
       {actionError && <Alert variant="danger" inline>{actionError}</Alert>}
@@ -97,7 +93,7 @@ export function HandoffCard({ handoff, token, onAction }: { handoff: FeedHandoff
           Send reply
         </button>
         <button type="button" className="btn btn--secondary" disabled={busy} onClick={handleTakeover}>
-          I&apos;ll chat to them myself
+          Take over this chat
         </button>
       </div>
     </div>
