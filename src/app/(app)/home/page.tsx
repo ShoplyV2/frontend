@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOnboarding } from '@/lib/useOnboarding';
-import { useFeedData } from '@/lib/useFeedData';
 import { sellerMessage } from '@/lib/errorMessage';
 import { buildQueue, filterQueue, type QueueFilter } from '@/lib/queue';
 import { useMediaQuery } from '@/lib/useMediaQuery';
@@ -12,6 +11,7 @@ import { useNow } from '@/lib/useNow';
 import { Page } from '@/components/shell/Page';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { useShop } from '@/components/shell/ShopProvider';
+import { useFeed } from '@/components/shell/FeedProvider';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
 import { QueueList } from '@/components/home/QueueList';
@@ -30,9 +30,9 @@ export default function HomePage() {
   const { profile, state, channels } = setup;
 
   // Orders and assistant questions only exist for a shop that is open — the feed API refuses anyone
-  // else — so don't ask for them until the profile says this one is.
+  // else. The shared feed (FeedProvider) doesn't ask for them until the profile says this one is.
   const isLive = profile?.status === 'LIVE';
-  const feed = useFeedData(isLive ? token : null);
+  const feed = useFeed();
   const now = useNow(60_000);
 
   // A shop that isn't open yet has nothing to run. Home is where setup resumes.

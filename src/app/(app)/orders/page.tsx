@@ -7,12 +7,12 @@ import { formatMoney } from '@/lib/format';
 import { ORDER_STATUS } from '@/lib/labels';
 import { sellerMessage } from '@/lib/errorMessage';
 import { timeAgoShort } from '@/lib/time';
-import { useFeedData } from '@/lib/useFeedData';
 import { useNow } from '@/lib/useNow';
 import { useMediaQuery } from '@/lib/useMediaQuery';
 import { Page } from '@/components/shell/Page';
 import { PageHeader } from '@/components/shell/PageHeader';
 import { useShop } from '@/components/shell/ShopProvider';
+import { useFeed } from '@/components/shell/FeedProvider';
 import { OrderDetail } from '@/components/orders/OrderDetail';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { Alert } from '@/components/ui/Alert';
@@ -41,9 +41,9 @@ function buyerWhere(o: FeedOrder): string {
 function OrdersContent() {
   const router = useRouter();
   const params = useSearchParams();
-  const { token, refresh: refreshShop } = useShop();
+  const { token, profile, refresh: refreshShop } = useShop();
   const now = useNow(30_000);
-  const { orders, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeedData(token);
+  const { orders, loading, error, pendingUpdates, applyPending, refresh, patchOrder } = useFeed();
   const [filter, setFilter] = useState<OrderFilter>('all');
   // Wide screens keep the selected order beside the list; narrower ones open it in a drawer.
   const isWide = useMediaQuery('(min-width: 1200px)');
@@ -60,8 +60,9 @@ function OrdersContent() {
   }
 
   // The orders API only serves an open shop and answers 403 to anyone else. That's a seller who
-  // hasn't finished setup — send them there rather than showing an error.
-  const shopNotOpen = error instanceof ApiError && error.code === 'FORBIDDEN';
+  // hasn't finished setup — send them there rather than showing an error. (The shared feed doesn't
+  // even ask until the profile says the shop is open, so the profile is the usual way to know.)
+  const shopNotOpen = (error instanceof ApiError && error.code === 'FORBIDDEN') || (profile != null && profile.status !== 'LIVE');
   useEffect(() => {
     if (shopNotOpen) router.replace('/welcome');
   }, [shopNotOpen, router]);
