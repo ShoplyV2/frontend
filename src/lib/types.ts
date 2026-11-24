@@ -15,14 +15,7 @@ export type HandoffReason =
 
 export type HandoffStatus = 'PENDING' | 'ANSWERED' | 'TIMED_OUT' | 'ESCALATED' | 'CANCELLED';
 
-export interface FeedOrder {
-  _id: string;
-  conversationId: string;
-  buyer: {
-    waId: string;
-    phone: string;
-    name: string | null;
-  };
+export interface FeedOrderLine {
   item: {
     itemId: string;
     nameSnapshot: string;
@@ -37,6 +30,19 @@ export interface FeedOrder {
   };
   qty: number;
   unitPrice: number;
+  lineTotal: number;
+}
+
+export interface FeedOrder {
+  _id: string;
+  conversationId: string;
+  buyer: {
+    waId: string;
+    phone: string;
+    name: string | null;
+  };
+  /** What the buyer is paying for. One order is one checkout, however many items are in it. */
+  lines: FeedOrderLine[];
   subtotal: number;
   deliveryFee: number;
   total: number;

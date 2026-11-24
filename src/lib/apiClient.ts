@@ -85,8 +85,12 @@ export function takeoverHandoff(token: string, handoffId: string): Promise<{ out
   return request(token, `/feed/handoffs/${handoffId}/takeover`, { method: 'POST' });
 }
 
-export function markSoldOut(token: string, orderId: string): Promise<{ outcome: string }> {
-  return request(token, `/feed/orders/${orderId}/sold-out`, { method: 'POST' });
+// `line` says which item of a several-item order to hide; a one-item order needs none.
+export function markSoldOut(token: string, orderId: string, line?: number): Promise<{ outcome: string }> {
+  return request(token, `/feed/orders/${orderId}/sold-out`, {
+    method: 'POST',
+    ...(line === undefined ? {} : { body: JSON.stringify({ line }) }),
+  });
 }
 
 export function dispatchOrder(token: string, orderId: string): Promise<{ order: FeedOrder }> {

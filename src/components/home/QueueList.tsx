@@ -1,6 +1,7 @@
 'use client';
 
 import { ORDER_STATUS } from '@/lib/labels';
+import { orderPhoto, orderTitle } from '@/lib/orderLines';
 import { filterQueue, isNeedsYou, isToSend, type QueueFilter, type QueueItem } from '@/lib/queue';
 import { timeAgoShort } from '@/lib/time';
 import { useNow } from '@/lib/useNow';
@@ -47,14 +48,14 @@ function Row({ item, selected, onSelect, now }: { item: QueueItem; selected: boo
   } else {
     const o = item.order;
     const info = ORDER_STATUS[o.status];
-    title = o.item.nameSnapshot;
+    title = orderTitle(o);
     subtitle = [o.delivery.name || o.buyer.name || 'Buyer', o.delivery.area].filter(Boolean).join(' · ');
     badge = o.fulfillmentRisk === 'STOCK_LOST' ? { label: 'Sold out', className: 'badge badge--danger' } : { label: info.chip, className: `badge badge--${info.tone}` };
     tile = (
       <span className="tile tile--40" aria-hidden="true">
-        {o.item.imageUrlSnapshot ? (
+        {orderPhoto(o) ? (
           // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
-          <img src={o.item.imageUrlSnapshot} alt="" />
+          <img src={orderPhoto(o) ?? ''} alt="" />
         ) : (
           <BagIcon />
         )}

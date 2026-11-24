@@ -6,6 +6,7 @@ import { ApiError } from '@/lib/apiClient';
 import { formatMoney } from '@/lib/format';
 import { ORDER_STATUS } from '@/lib/labels';
 import { sellerMessage } from '@/lib/errorMessage';
+import { orderPhoto, orderSummary, orderTitle } from '@/lib/orderLines';
 import { timeAgoShort } from '@/lib/time';
 import { useNow } from '@/lib/useNow';
 import { useMediaQuery } from '@/lib/useMediaQuery';
@@ -131,9 +132,9 @@ function OrdersContent() {
                     <li key={o._id}>
                       <button type="button" className="order-row" aria-current={o._id === (selected?._id ?? openId) ? 'true' : undefined} onClick={() => setOpenId(o._id)}>
                         <span className="tile tile--44" aria-hidden="true">
-                          {o.item.imageUrlSnapshot ? (
+                          {orderPhoto(o) ? (
                             // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
-                            <img src={o.item.imageUrlSnapshot} alt="" />
+                            <img src={orderPhoto(o) ?? ''} alt="" />
                           ) : (
                             <svg viewBox="0 0 48 48" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M12 18h24l2.5 22h-29L12 18z" />
@@ -142,9 +143,9 @@ function OrdersContent() {
                           )}
                         </span>
                         <span className="order-main">
-                          <span className="truncate order-name">{o.item.nameSnapshot}</span>
+                          <span className="truncate order-name">{orderTitle(o)}</span>
                           <span className="truncate order-sub">
-                            {o.variant.color}, {o.variant.size} × {o.qty}
+                            {orderSummary(o)}
                           </span>
                         </span>
                         <span className="order-buyer truncate">{buyerWhere(o)}</span>
@@ -164,9 +165,9 @@ function OrdersContent() {
                   <li key={o._id}>
                     <button type="button" className="order-card" onClick={() => setOpenId(o._id)}>
                       <span className="tile tile--48" aria-hidden="true">
-                        {o.item.imageUrlSnapshot ? (
+                        {orderPhoto(o) ? (
                           // eslint-disable-next-line @next/next/no-img-element -- seller-uploaded R2 URL, not a local/optimizable asset
-                          <img src={o.item.imageUrlSnapshot} alt="" />
+                          <img src={orderPhoto(o) ?? ''} alt="" />
                         ) : (
                           <svg viewBox="0 0 48 48" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 18h24l2.5 22h-29L12 18z" />
@@ -175,7 +176,7 @@ function OrdersContent() {
                         )}
                       </span>
                       <span className="order-main">
-                        <span className="truncate order-name">{o.item.nameSnapshot}</span>
+                        <span className="truncate order-name">{orderTitle(o)}</span>
                         <span className="truncate order-sub">
                           {buyerWhere(o)} · {formatMoney(o.total, o.currency)}
                         </span>
